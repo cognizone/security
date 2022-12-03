@@ -16,7 +16,7 @@ import org.springframework.security.saml2.provider.service.servlet.filter.Saml2W
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
-import zone.cogni.asquare.security2.AsquareHttpConfigurer;
+import zone.cogni.asquare.security2.SecurityHttpConfigurer;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class Saml2HttpConfigurer extends AsquareHttpConfigurer<Saml2HttpConfigurer> {
+public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigurer> {
   private final RelyingPartyRegistrationRepository relyingPartyRegistrationRepository;
   private final RoleMappingService roleMappingService;
   private final BasicAuthHandler basicAuthHandler;

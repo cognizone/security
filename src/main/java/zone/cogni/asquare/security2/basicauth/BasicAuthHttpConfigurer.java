@@ -6,12 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import zone.cogni.asquare.security2.AsquareHttpConfigurer;
+import zone.cogni.asquare.security2.SecurityHttpConfigurer;
 
 import javax.annotation.PostConstruct;
 
 @RequiredArgsConstructor
-public class BasicAuthHttpConfigurer extends AsquareHttpConfigurer<BasicAuthHttpConfigurer> {
+public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHttpConfigurer> {
   private static final String[] emptyStringArray = new String[0];
   private static final String defaultRealmName = "Who are you?";
 
