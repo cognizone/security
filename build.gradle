@@ -1,0 +1,88 @@
+plugins {
+  id 'pl.allegro.tech.build.axion-release' version '1.13.3'
+  id 'org.springframework.boot' version '2.6.14' apply false
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'java'
+  id 'maven-publish'
+}
+
+scmVersion {
+  tag {
+    prefix = "v"
+    versionSeparator = ""
+    branchPrefix = [
+            'release/.*': 'release-v',
+            'hotfix/.*' : 'hotfix-v'
+    ]
+  }
+  nextVersion {
+    suffix = "SNAPSHOT"
+    separator = "-"
+  }
+}
+
+group = 'zone.cogni.security'
+version = '1.0.0' //scmVersion.version
+sourceCompatibility = '11'
+
+repositories {
+  mavenCentral()
+  mavenLocal()
+  maven { url "https://repo.spring.io/milestone" }
+  maven { url "https://archiva.cogni.zone/repository/public" }
+}
+
+dependencyManagement {
+  imports {
+    mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+  }
+}
+
+ext {
+  asquareVersion = "0.6.4"
+  commonsCollectionsVersion = "4.4"
+  commonsLang3Version = "3.12.0"
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation("zone.cogni.asquare:cogni-core:${asquareVersion}")
+
+    // libs
+  implementation("org.apache.commons:commons-collections4:${commonsCollectionsVersion}")
+  implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
+  implementation("javax.inject:javax.inject:1")
+
+    // spring
+  implementation('org.springframework.boot:spring-boot-starter-web')
+  implementation('org.springframework.boot:spring-boot-starter-security')
+  implementation('org.springframework.security:spring-security-saml2-service-provider')
+}
+
+tasks.named('test') {
+  useJUnitPlatform()
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId = group
+      artifactId = 'security'
+      version = "1.0.0" //scmVersion.version
+      from components.java
+    }
+  }
+  repositories {
+    maven {
+      credentials {
+        username = System.properties['archiva.user']
+        password = System.properties['archiva.password']
+      }
+      name = 'public'
+      url = System.properties['archiva.url']
+    }
+  }
+}
