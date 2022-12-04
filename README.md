@@ -6,7 +6,7 @@
 //Use any of the following
 //@EnableSaml2
 @EnableBasicAuth
-//@EnableSecurity  //for in near future -> this one will select the security type based on config
+//@EnableSecurity
 public class WebSecurityConfig {
 
   //Inject this using your favorite way
@@ -28,7 +28,14 @@ public class WebSecurityConfig {
 ```
 Beside the auth type passed via the Enable annotation, no other code needs to be changed. Everything will be set via configuration.
 
-Using `@EnableSecurity`, which will be added in the near future, this auth type selection will also be done via configuration.
+Using `@EnableSecurity`, the auth type selection is done via configuration, so no code change needed if auth type changes.
+
+## Configuration for type selection with `@EnableSecurity`
+```yaml
+cognizone:
+  security:
+    auth-method: basic # other accepted values are: saml2
+```
 
 ## Configuration example - SAML2
 
