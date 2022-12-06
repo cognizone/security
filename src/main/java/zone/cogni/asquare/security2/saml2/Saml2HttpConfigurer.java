@@ -3,7 +3,6 @@ package zone.cogni.asquare.security2.saml2;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +16,7 @@ import org.springframework.security.saml2.provider.service.servlet.filter.Saml2W
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
+import zone.cogni.asquare.security2.SecurityHttpConfigurer;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,8 +30,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class Saml2HttpConfigurer extends AbstractHttpConfigurer<Saml2HttpConfigurer, HttpSecurity> {
-
+public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigurer> {
   private final RelyingPartyRegistrationRepository relyingPartyRegistrationRepository;
   private final RoleMappingService roleMappingService;
   private final BasicAuthHandler basicAuthHandler;
