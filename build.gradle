@@ -22,7 +22,7 @@ scmVersion {
 }
 
 group = 'zone.cogni.security'
-version = '1.0.0' //scmVersion.version
+version = scmVersion.version
 sourceCompatibility = '11'
 
 repositories {
@@ -74,7 +74,7 @@ publishing {
     mavenJava(MavenPublication) {
       groupId = group
       artifactId = 'security'
-      version = "1.0.0" //scmVersion.version
+      version = scmVersion.version
       from components.java
     }
   }
