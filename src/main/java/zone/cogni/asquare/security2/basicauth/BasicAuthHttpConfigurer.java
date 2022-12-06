@@ -2,6 +2,7 @@ package zone.cogni.asquare.security2.basicauth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
@@ -11,6 +12,7 @@ import zone.cogni.asquare.security2.SecurityHttpConfigurer;
 import javax.annotation.PostConstruct;
 
 @RequiredArgsConstructor
+@Slf4j
 public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHttpConfigurer> {
   private static final String[] emptyStringArray = new String[0];
   private static final String defaultRealmName = "Who are you?";
@@ -21,6 +23,7 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
   @PostConstruct
   @SneakyThrows
   private void init() {
+    log.info("Initializing basic-auth security");
     InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer = authenticationManagerBuilder.inMemoryAuthentication();
     basicAuthProperties.getUsers()
                        .forEach((key, value) -> addUser(configurer, key, value));

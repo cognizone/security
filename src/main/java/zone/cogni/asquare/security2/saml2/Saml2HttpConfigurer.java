@@ -1,6 +1,7 @@
 package zone.cogni.asquare.security2.saml2;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Slf4j
 public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigurer> {
   private final RelyingPartyRegistrationRepository relyingPartyRegistrationRepository;
   private final RoleMappingService roleMappingService;
@@ -38,6 +40,7 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
 
   @Override
   public void init(HttpSecurity http) throws Exception {
+    log.info("Initializing saml2 security");
     RelyingPartyRegistrationResolver relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
     Saml2MetadataFilter metadataFilter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
 
