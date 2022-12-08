@@ -25,7 +25,7 @@ public class PermissionService<T extends Enum> {
   private final Map<String, Set<T>> roleName2permissions = Collections.synchronizedMap(new HashMap<>());
   private final Class<T> enumClass;
   private Set<T> defaultPermissions;
-  @Value("${cognizone.permission.role.resource:/role_access.json}")
+  @Value("${cognizone.permission.roles.resource:/role_access.json}")
   private String roleAccess;
 
   public PermissionService(Class<T> enumClass) {
