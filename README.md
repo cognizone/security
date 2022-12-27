@@ -109,3 +109,24 @@ cognizone:
           roles:  #roles are optional
             - view
 ```
+
+## PermissionService
+To enable just add this config:
+````yaml
+cognizone:
+  security:
+    permission-service:
+      enabled: true
+      roleAccess: classpath:security/rolesAccess.json
+````
+Beside that an enum with the permissions needs to be created in this package/class: `zone.cogni.lib.security.permission.Permission`
+```java
+package zone.cogni.lib.security.permission;
+
+public enum Permission {
+  mainPage_requestTransformation_isEnabled,
+  navigation_admin_isEnabled
+}
+```
+After that, the PermissionService will be available to Inject in any service. 
+Also the annotation @HasPermission can be used to check the permissions in the Controller classes.
