@@ -31,10 +31,6 @@ scmVersion {
   }
 }
 
-group = 'zone.cogni.lib.security'
-version = scmVersion.version
-sourceCompatibility = '11'
-
 ext {
   asquareVersion = "0.6.4"
   snakeyamlVersion = "1.33"
@@ -54,6 +50,10 @@ subprojects {
   apply plugin: 'idea'
   apply plugin: "io.freefair.lombok"
   apply plugin: 'io.spring.dependency-management'
+
+  group = 'zone.cogni.lib.security'
+  version = scmVersion.version
+  sourceCompatibility = '11'
 
   repositories {
     mavenLocal()
