@@ -1,5 +1,6 @@
 package zone.cogni.lib.security.saml2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,11 +43,11 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
   public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
     Saml2Properties properties = saml2Properties();
     Saml2X509Credential signingCertificate = getSigningCertificate(saml2Properties().getSigningKeyStore());
-    RelyingPartyRegistration rpr = RelyingPartyRegistrations.fromMetadataLocation(properties.getIdpUrl())
-            .signingX509Credentials(coll -> coll.add(signingCertificate))
-            .registrationId(properties.getRegistrationId())
-            .build();
-    return new InMemoryRelyingPartyRegistrationRepository(rpr);
+    RelyingPartyRegistration.Builder rprBuilder = RelyingPartyRegistrations.fromMetadataLocation(properties.getIdpUrl())
+                                                                           .signingX509Credentials(coll -> coll.add(signingCertificate))
+                                                                           .registrationId(properties.getRegistrationId());
+    if(StringUtils.isNotBlank(properties.getEntityId())) rprBuilder.entityId(properties.getEntityId());
+    return new InMemoryRelyingPartyRegistrationRepository(rprBuilder.build());
   }
 
   @Bean

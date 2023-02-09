@@ -12,6 +12,7 @@ public class Saml2Properties {
 
   private SigningKeys signingKeyStore;
   private String registrationId;
+  private String entityId;
   private String idpUrl;
   private Attributes attributes;
   private String roleMappingUrl;

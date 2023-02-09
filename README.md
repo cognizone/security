@@ -61,6 +61,7 @@ cognizone:
         roles: urn:oid:2.5.4.72
         email: urn:oid:1.2.840.113549.1.9.1
       registration-id: myApplication # Registration ID, used to register the application in SAML 
+      entity-id: "urn:eiam.admin.ch:sp:MyApplication" # Entity ID (can be templated), optional and defaults to "{baseUrl}/saml2/service-provider-metadata/{registrationId}"
       basic-auth-users: # Optional: configuration to be able to do basic-auth call's (for example for API calls)
         admin:
           password: "{bcrypt}$2a$12$.6Mn9xZi5a1vwCBtH6Yy4ulmoTr8qvoS9tgZTk/UXy/OOwa4r14cG"
