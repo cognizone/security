@@ -132,3 +132,24 @@ public enum Permission {
 ```
 After that, the PermissionService will be available to Inject in any service. 
 Also the annotation @HasPermission can be used to check the permissions in the Controller classes.
+
+_Note1: if you want to use permission strings with special characters, you can make the Permission enum implement PermissionValue.
+When using string, this will match the enum name and the getValue() from PermissionValue._
+```java
+public enum Permission implements PermissionValue {
+  navigation_admin_isEnabled("navigation/admin:isEnabled");
+
+  private final String value;
+
+  Permission(String value) {
+    this.value = value;
+  }
+
+  @Override
+  public String getValue() {
+    return value;
+  }
+}
+```
+_Note2: You can mix the usage of Permission enum and String values. 
+Also, not all String values need to be represented by a Permission enum._ 
