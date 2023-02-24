@@ -1,6 +1,7 @@
 package zone.cogni.lib.security.saml2;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ public class Saml2Properties {
   private SigningKeys signingKeyStore;
   private String registrationId;
   private String entityId;
+  private String baseUrl;
   private String idpUrl;
   private Attributes attributes;
   private String roleMappingUrl;
@@ -25,8 +27,10 @@ public class Saml2Properties {
   public static class SigningKeys {
     private KeyStoreType type;
     private String storeUrl;
+    @ToString.Exclude
     private String keystorePassword;
     private String alias;
+    @ToString.Exclude
     private String certificatePassword;
   }
 
@@ -42,6 +46,7 @@ public class Saml2Properties {
 
   @Data
   public static class User {
+    @ToString.Exclude
     private String password;
     private List<String> roles = new ArrayList<>(); //init so we allow empty config
   }

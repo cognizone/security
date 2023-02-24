@@ -46,6 +46,7 @@ cognizone:
     saml2:
       logSamlResponse: true # optional, if set to true, logs the saml XML response
       role-mapping-url: classpath:/security/samlRoleMapping-aws.json # Mapping between role defined in SAML server and your application
+      baseUrl: https://myserv.com/myAppContext  #optional baseURL of you application (useful in case the infra has some intermediate proxies and spring cannot correctly find the real external URL) 
       signing-key-store: # Information to get application certificate registered in SAML server 
         type: jks    # At the moment only JKS is supported
         store-url: classpath:/security/saml-signing.jks

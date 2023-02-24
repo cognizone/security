@@ -1,5 +1,6 @@
 package zone.cogni.lib.security.saml2;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,10 @@ import java.security.cert.X509Certificate;
 import static org.springframework.security.saml2.core.Saml2X509Credential.Saml2X509CredentialType.SIGNING;
 
 @Configuration
+@Slf4j
 public class Saml2Configuration extends PermissionGlobalMethodSecurityConfiguration {
+  private static final String defaultEntityId = "{baseUrl}/saml2/service-provider-metadata/{registrationId}";
+  private static final String defaultAssertionConsumerServiceLocation = "{baseUrl}/login/saml2/sso/{registrationId}";
 
   @Bean
   public Saml2HttpConfigurer saml2HttpConfigurer() {
@@ -46,7 +50,16 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
     RelyingPartyRegistration.Builder rprBuilder = RelyingPartyRegistrations.fromMetadataLocation(properties.getIdpUrl())
                                                                            .signingX509Credentials(coll -> coll.add(signingCertificate))
                                                                            .registrationId(properties.getRegistrationId());
-    if(StringUtils.isNotBlank(properties.getEntityId())) rprBuilder.entityId(properties.getEntityId());
+    if (StringUtils.isNotBlank(properties.getBaseUrl())) {
+      String entityIdTemplate = StringUtils.firstNonBlank(properties.getEntityId(), defaultEntityId);
+      rprBuilder.entityId(entityIdTemplate.replace("{baseUrl}", properties.getBaseUrl()))
+                .assertionConsumerServiceLocation(defaultAssertionConsumerServiceLocation.replace("{baseUrl}", properties.getBaseUrl()));
+    }
+    else if (StringUtils.isNotBlank(properties.getEntityId())) {
+      //we can do else if because properties.getEntityId() is used anyway in first if block
+      rprBuilder.entityId(properties.getEntityId());
+    }
+    log.info("Init RelyingPartyRegistration with {}", properties);
     return new InMemoryRelyingPartyRegistrationRepository(rprBuilder.build());
   }
 
