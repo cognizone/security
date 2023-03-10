@@ -1,7 +1,7 @@
-package zone.cogni.lib.security;
+package zone.cogni.lib.security.saml2;
 
 import org.springframework.context.annotation.Import;
-import zone.cogni.lib.security.common.SecurityConfiguration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Import(SecurityConfiguration.class)
-public @interface EnableSecurity {
+@Import(Saml2Configuration.class)
+@EnableWebSecurity
+public @interface EnableSecuritySaml2 {
 }
