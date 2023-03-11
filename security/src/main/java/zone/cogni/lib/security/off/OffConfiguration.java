@@ -1,4 +1,4 @@
-package zone.cogni.lib.security.disabled;
+package zone.cogni.lib.security.off;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class DisabledConfiguration {
+public class OffConfiguration {
   @Bean
-  public DisabledHttpConfigurer disabledHttpConfigurer() {
-    return new DisabledHttpConfigurer();
+  public OffHttpConfigurer offHttpConfigurer() {
+    return new OffHttpConfigurer();
   }
 
 }

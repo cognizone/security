@@ -1,4 +1,4 @@
-package zone.cogni.lib.security.disabled;
+package zone.cogni.lib.security.off;
 
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Import(DisabledConfiguration.class)
+@Import(OffConfiguration.class)
 @EnableWebSecurity
 public @interface EnableSecurityOff {
 }

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
 import zone.cogni.lib.security.basicauth.EnableSecurityBasicAuth;
-import zone.cogni.lib.security.disabled.EnableSecurityOff;
+import zone.cogni.lib.security.off.EnableSecurityOff;
 import zone.cogni.lib.security.permission.PermissionServiceConfiguration;
 import zone.cogni.lib.security.saml2.EnableSecuritySaml2;
 
@@ -42,13 +42,13 @@ public class SecurityConfiguration {
   }
 
   @Configuration
-  @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "disabled")
+  @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "off")
   @EnableSecurityOff
-  public static class GenericDisabledConfiguration {
+  public static class GenericOffConfiguration {
   }
 
   @Configuration
-  @Conditional(NoExpectedValuesCondition.class)
+  @Conditional(NoExpectedValuesCondition.class) //if we match, it means no or wrong auth-method is passed
   @RequiredArgsConstructor
   public static class GenericMissingMakeLog {
     @Value("${cognizone.security.auth-method:}")
@@ -62,7 +62,7 @@ public class SecurityConfiguration {
     }
   }
 
-  public static class NoExpectedValuesCondition extends NoneNestedConditions {
+  public static class NoExpectedValuesCondition extends NoneNestedConditions { //this condition will match if no Conditions specified in the class match
 
     public NoExpectedValuesCondition() {
       super(ConfigurationPhase.PARSE_CONFIGURATION);
@@ -76,8 +76,8 @@ public class SecurityConfiguration {
     static class Saml2Condition {
     }
 
-    @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "disabled")
-    static class DisabledCondition {
+    @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "off")
+    static class OffCondition {
     }
 
   }

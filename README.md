@@ -35,7 +35,7 @@ Using `@EnableSecurity`, the auth type selection is done via configuration, so n
 ```yaml
 cognizone:
   security:
-    auth-method: basic # other accepted values are: saml2, disabled
+    auth-method: basic # other accepted values are: saml2, off
 ```
 
 ## Configuration example - SAML2
