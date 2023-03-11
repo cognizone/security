@@ -4,8 +4,9 @@
 ```java
 @Configuration
 //Use any of the following
-//@EnableSaml2
-@EnableBasicAuth
+//@EnableSecuritySaml2
+@EnableSecureBasicAuth
+//@EnableSecurityOff
 //@EnableSecurity
 public class WebSecurityConfig {
 
@@ -34,7 +35,7 @@ Using `@EnableSecurity`, the auth type selection is done via configuration, so n
 ```yaml
 cognizone:
   security:
-    auth-method: basic # other accepted values are: saml2
+    auth-method: basic # other accepted values are: saml2, off
 ```
 
 ## Configuration example - SAML2

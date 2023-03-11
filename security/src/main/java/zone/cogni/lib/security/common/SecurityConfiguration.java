@@ -1,4 +1,4 @@
-package zone.cogni.lib.security.generic;
+package zone.cogni.lib.security.common;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +12,10 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
-import zone.cogni.lib.security.basicauth.EnableBasicAuth;
+import zone.cogni.lib.security.basicauth.EnableSecurityBasicAuth;
+import zone.cogni.lib.security.off.EnableSecurityOff;
 import zone.cogni.lib.security.permission.PermissionServiceConfiguration;
-import zone.cogni.lib.security.saml2.EnableSaml2;
+import zone.cogni.lib.security.saml2.EnableSecuritySaml2;
 
 import javax.annotation.PostConstruct;
 
@@ -30,18 +31,24 @@ public class SecurityConfiguration {
 
   @Configuration
   @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "basic")
-  @EnableBasicAuth
+  @EnableSecurityBasicAuth
   public static class GenericBasicAuthConfiguration {
   }
 
   @Configuration
   @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "saml2")
-  @EnableSaml2
+  @EnableSecuritySaml2
   public static class GenericSaml2Configuration {
   }
 
   @Configuration
-  @Conditional(NoExpectedValuesCondition.class)
+  @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "off")
+  @EnableSecurityOff
+  public static class GenericOffConfiguration {
+  }
+
+  @Configuration
+  @Conditional(NoExpectedValuesCondition.class) //if we match, it means no or wrong auth-method is passed
   @RequiredArgsConstructor
   public static class GenericMissingMakeLog {
     @Value("${cognizone.security.auth-method:}")
@@ -55,7 +62,7 @@ public class SecurityConfiguration {
     }
   }
 
-  public static class NoExpectedValuesCondition extends NoneNestedConditions {
+  public static class NoExpectedValuesCondition extends NoneNestedConditions { //this condition will match if no Conditions specified in the class match
 
     public NoExpectedValuesCondition() {
       super(ConfigurationPhase.PARSE_CONFIGURATION);
@@ -67,6 +74,10 @@ public class SecurityConfiguration {
 
     @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "saml2")
     static class Saml2Condition {
+    }
+
+    @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "off")
+    static class OffCondition {
     }
 
   }
