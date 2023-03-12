@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
+import zone.cogni.lib.security.common.GlobalProperties;
+import zone.cogni.lib.security.common.LogoutConfigurer;
 
 import javax.annotation.PostConstruct;
 
@@ -17,6 +19,7 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
   private static final String[] emptyStringArray = new String[0];
   private static final String defaultRealmName = "Who are you?";
 
+  private final GlobalProperties globalProperties;
   private final BasicAuthProperties basicAuthProperties;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -39,7 +42,8 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
   @SneakyThrows
   public void init(HttpSecurity http) {
     http.httpBasic()
-        .realmName(StringUtils.defaultIfBlank(basicAuthProperties.getRealm(), defaultRealmName));
+        .realmName(StringUtils.defaultIfBlank(basicAuthProperties.getRealm(), defaultRealmName)).and()
+        .apply(new LogoutConfigurer(globalProperties.getLogout()));
   }
 
   @Override

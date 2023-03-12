@@ -10,17 +10,14 @@ import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
 import zone.cogni.lib.security.basicauth.EnableSecurityBasicAuth;
 import zone.cogni.lib.security.off.EnableSecurityOff;
-import zone.cogni.lib.security.permission.PermissionServiceConfiguration;
 import zone.cogni.lib.security.saml2.EnableSecuritySaml2;
 
 import javax.annotation.PostConstruct;
 
 @Configuration
-@Import(PermissionServiceConfiguration.class)
 @Slf4j
 public class SecurityConfiguration {
 

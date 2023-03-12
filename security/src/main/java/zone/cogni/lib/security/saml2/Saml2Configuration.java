@@ -30,7 +30,7 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
 
   @Bean
   public Saml2HttpConfigurer saml2HttpConfigurer() {
-    return new Saml2HttpConfigurer(relyingPartyRegistrationRepository(), roleMappingService(), basicAuthHandler(), saml2Properties());
+    return new Saml2HttpConfigurer(relyingPartyRegistrationRepository(), roleMappingService(), basicAuthHandler(), globalProperties(), saml2Properties());
   }
 
   @Bean
@@ -46,20 +46,25 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
   @Bean
   public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
     Saml2Properties properties = saml2Properties();
+    log.info("Init RelyingPartyRegistration with {}", properties);
+
     Saml2X509Credential signingCertificate = getSigningCertificate(saml2Properties().getSigningKeyStore());
     RelyingPartyRegistration.Builder rprBuilder = RelyingPartyRegistrations.fromMetadataLocation(properties.getIdpUrl())
                                                                            .signingX509Credentials(coll -> coll.add(signingCertificate))
                                                                            .registrationId(properties.getRegistrationId());
-    if (StringUtils.isNotBlank(properties.getBaseUrl())) {
-      String entityIdTemplate = StringUtils.firstNonBlank(properties.getEntityId(), defaultEntityId);
-      rprBuilder.entityId(entityIdTemplate.replace("{baseUrl}", properties.getBaseUrl()))
-                .assertionConsumerServiceLocation(defaultAssertionConsumerServiceLocation.replace("{baseUrl}", properties.getBaseUrl()));
+
+    String baseUrl = StringUtils.defaultIfBlank(properties.getBaseUrl(), "{baseUrl}");
+    String entityIdTemplate = StringUtils.firstNonBlank(properties.getEntityId(), defaultEntityId);
+    rprBuilder.entityId(entityIdTemplate.replace("{baseUrl}", baseUrl))
+              .assertionConsumerServiceLocation(defaultAssertionConsumerServiceLocation.replace("{baseUrl}", baseUrl));
+
+    if (StringUtils.isNotBlank(globalProperties().getLogout().getUrl())) {
+      String logoutUrl = baseUrl + "/saml/singleLogout";
+      log.info("Setting logout-url in RelyingPartyRegistration to {}", logoutUrl);
+      rprBuilder.singleLogoutServiceLocation(logoutUrl);
+      rprBuilder.singleLogoutServiceResponseLocation(logoutUrl);
     }
-    else if (StringUtils.isNotBlank(properties.getEntityId())) {
-      //we can do else if because properties.getEntityId() is used anyway in first if block
-      rprBuilder.entityId(properties.getEntityId());
-    }
-    log.info("Init RelyingPartyRegistration with {}", properties);
+
     return new InMemoryRelyingPartyRegistrationRepository(rprBuilder.build());
   }
 
