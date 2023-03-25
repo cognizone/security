@@ -117,9 +117,10 @@ cognizone:
 ```yaml
 cognizone:
   security:
-    logout:
-      url: /api/logout    # URL to use to trigger logout, 
-      success-url: https://www.gruutemet.be/  # [OPTIONAL] URL to go to after successful logout (logout URL has to be set)
+    global-properties:
+      logout:
+        url: /api/logout    # URL to use to trigger logout, 
+        success-url: https://www.gruutemet.be/  # [OPTIONAL] URL to go to after successful logout (logout URL has to be set)
 ```
 ## PermissionService
 To enable just add this config:

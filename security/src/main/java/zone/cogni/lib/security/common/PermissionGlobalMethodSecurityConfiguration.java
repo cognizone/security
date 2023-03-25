@@ -35,7 +35,7 @@ public abstract class PermissionGlobalMethodSecurityConfiguration extends Global
     return manager;
   }
 
-  @ConfigurationProperties(prefix = "cognizone.security")
+  @ConfigurationProperties(prefix = "cognizone.security.global-properties")
   @Bean
   public GlobalProperties globalProperties() {
     return new GlobalProperties();
