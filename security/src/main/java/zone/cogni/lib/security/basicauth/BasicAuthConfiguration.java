@@ -17,6 +17,6 @@ public class BasicAuthConfiguration extends PermissionGlobalMethodSecurityConfig
 
   @Bean
   public BasicAuthHttpConfigurer basicAuthHttpConfigurer(AuthenticationManagerBuilder authenticationManagerBuilder) {
-    return new BasicAuthHttpConfigurer(basicAuthProperties(), authenticationManagerBuilder);
+    return new BasicAuthHttpConfigurer(globalProperties(), basicAuthProperties(), authenticationManagerBuilder);
   }
 }

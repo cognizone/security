@@ -19,6 +19,8 @@ import org.springframework.security.saml2.provider.service.web.DefaultRelyingPar
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
+import zone.cogni.lib.security.common.GlobalProperties;
+import zone.cogni.lib.security.common.LogoutConfigurer;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -37,6 +39,7 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
   private final RelyingPartyRegistrationRepository relyingPartyRegistrationRepository;
   private final RoleMappingService roleMappingService;
   private final BasicAuthHandler basicAuthHandler;
+  private final GlobalProperties globalProperties;
   private final Saml2Properties saml2Properties;
 
   @Override
@@ -47,6 +50,7 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
 
     http
             .saml2Login().and()
+            .apply(new LogoutConfigurer(globalProperties.getLogout())).and()
             .addFilterBefore(this::basicAuthFilter, Saml2WebSsoAuthenticationFilter.class)
             .addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class)
             .addFilterAfter(this::patchAuthenticationObjectFilter, Saml2WebSsoAuthenticationFilter.class);
@@ -69,7 +73,10 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
       ExtendedSaml2Authentication patchedAuthentication = new ExtendedSaml2Authentication(authorities, (Saml2Authentication) authentication);
       securityContext.setAuthentication(patchedAuthentication);
 
-      if(BooleanUtils.isTrue(saml2Properties.getLogSamlResponse())) log.info("Received saml response: {}", patchedAuthentication.getSaml2Response());
+      if (BooleanUtils.isTrue(saml2Properties.getLogSamlResponse())) log.info("Received saml response: {}", patchedAuthentication.getSaml2Response());
+    }
+    else if (null != authentication && !(authentication instanceof ExtendedSaml2Authentication)) {
+      log.warn("Authentication object is not instanceof (Extended)Saml2Authentication: {}", authentication.getClass());
     }
 
     chain.doFilter(request, response);
@@ -77,7 +84,7 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
 
   private List<GrantedAuthority> getAuthorities(Saml2AuthenticatedPrincipal principal) {
     List<String> samlRoles = principal.getAttribute(saml2Properties.getAttributes().getRoles());
-    if(CollectionUtils.isEmpty(samlRoles)) return Collections.emptyList();
+    if (CollectionUtils.isEmpty(samlRoles)) return Collections.emptyList();
 
     return samlRoles.stream()
                     .map(roleMappingService::getApplicationRoleFor)

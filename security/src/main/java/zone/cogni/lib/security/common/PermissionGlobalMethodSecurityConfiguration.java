@@ -1,5 +1,7 @@
 package zone.cogni.lib.security.common;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
@@ -32,4 +34,11 @@ public abstract class PermissionGlobalMethodSecurityConfiguration extends Global
     permissionService.ifPresent(service -> manager.getDecisionVoters().add(new PermissionAccessDecisionVoter(service)));
     return manager;
   }
+
+  @ConfigurationProperties(prefix = "cognizone.security.global-properties")
+  @Bean
+  public GlobalProperties globalProperties() {
+    return new GlobalProperties();
+  }
+
 }
