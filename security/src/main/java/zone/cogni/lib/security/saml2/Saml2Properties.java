@@ -16,6 +16,7 @@ public class Saml2Properties {
   private String entityId;
   private String baseUrl;
   private String idpUrl;
+  private String assertionConsumerServiceUrl;
   private Attributes attributes;
   private String roleMappingUrl;
   private Boolean logSamlResponse;
