@@ -2,6 +2,7 @@ package zone.cogni.lib.security.saml2;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,8 +30,15 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
   private static final String defaultAssertionConsumerServiceLocation = "{baseUrl}/login/saml2/sso/{registrationId}";
 
   @Bean
-  public Saml2HttpConfigurer saml2HttpConfigurer() {
-    return new Saml2HttpConfigurer(relyingPartyRegistrationRepository(), roleMappingService(), basicAuthHandler(), globalProperties(), saml2Properties());
+  public Saml2HttpConfigurer saml2HttpConfigurer(@Value("${server.servlet.context-path:}") String contextPath) {
+    if(StringUtils.isBlank(contextPath)) {
+      contextPath = "/";
+    }
+    else {
+      contextPath = StringUtils.prependIfMissing(contextPath, "/");
+      contextPath = StringUtils.appendIfMissing(contextPath, "/");
+    }
+    return new Saml2HttpConfigurer(relyingPartyRegistrationRepository(), roleMappingService(), basicAuthHandler(), globalProperties(), saml2Properties(), contextPath);
   }
 
   @Bean
@@ -52,11 +60,13 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
     RelyingPartyRegistration.Builder rprBuilder = RelyingPartyRegistrations.fromMetadataLocation(properties.getIdpUrl())
                                                                            .signingX509Credentials(coll -> coll.add(signingCertificate))
                                                                            .registrationId(properties.getRegistrationId());
-
     String baseUrl = StringUtils.defaultIfBlank(properties.getBaseUrl(), "{baseUrl}");
     String entityIdTemplate = StringUtils.firstNonBlank(properties.getEntityId(), defaultEntityId);
+    String assertionConsumerServiceUrlTemplate = StringUtils.firstNonBlank(properties.getAssertionConsumerServiceUrl(), defaultAssertionConsumerServiceLocation);
+    log.info("Using entityIdTemplate: {}", entityIdTemplate);
+    log.info("Using assertionConsumerServiceUrlTemplate: {}", assertionConsumerServiceUrlTemplate);
     rprBuilder.entityId(entityIdTemplate.replace("{baseUrl}", baseUrl))
-              .assertionConsumerServiceLocation(defaultAssertionConsumerServiceLocation.replace("{baseUrl}", baseUrl));
+              .assertionConsumerServiceLocation(assertionConsumerServiceUrlTemplate.replace("{baseUrl}", baseUrl));
 
     if (StringUtils.isNotBlank(globalProperties().getLogout().getUrl())) {
       String logoutUrl = baseUrl + "/saml/singleLogout";

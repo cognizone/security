@@ -48,6 +48,7 @@ cognizone:
       logSamlResponse: true # optional, if set to true, logs the saml XML response
       role-mapping-url: classpath:/security/samlRoleMapping-aws.json # Mapping between role defined in SAML server and your application
       baseUrl: https://myserv.com/myAppContext  #optional baseURL of you application (useful in case the infra has some intermediate proxies and spring cannot correctly find the real external URL) 
+      assertionConsumerServiceUrl: https://intranet.fedlex-r.admin.ch/legiconso/saml/SSO   # optional: for example in case you want to reuse the configuration from another saml implementation  
       signing-key-store: # Information to get application certificate registered in SAML server 
         type: jks    # At the moment only JKS is supported
         store-url: classpath:/security/saml-signing.jks
@@ -75,8 +76,11 @@ cognizone:
           roles:
             - view
 ```
-_Note: if basic-auth users are passed, they will only be taken into account if the correct basic-auth header is passed.
+_Note1: if **basic-auth** users are passed, they will only be taken into account if the correct basic-auth header is passed.
 If the header is incorrect (no user, wrong password,...), this will just be ignored._
+
+_Note2: if you want to use **{registrationId}** in your **assertionConsumerServiceUrl**, 
+this has to be at the end of the url and as a separate path part._
 ### JSON role mapping file example
 ```json
 {
