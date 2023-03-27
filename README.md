@@ -48,6 +48,7 @@ cognizone:
       logSamlResponse: true # optional, if set to true, logs the saml XML response
       role-mapping-url: classpath:/security/samlRoleMapping-aws.json # Mapping between role defined in SAML server and your application
       baseUrl: https://myserv.com/myAppContext  #optional baseURL of you application (useful in case the infra has some intermediate proxies and spring cannot correctly find the real external URL) 
+      assertionConsumerServiceUrl: https://myapp.myserver.com/someapp/saml/SSO   # optional: for example in case you want to reuse the configuration from another saml implementation  
       signing-key-store: # Information to get application certificate registered in SAML server 
         type: jks    # At the moment only JKS is supported
         store-url: classpath:/security/saml-signing.jks
@@ -63,7 +64,7 @@ cognizone:
         roles: urn:oid:2.5.4.72
         email: urn:oid:1.2.840.113549.1.9.1
       registration-id: myApplication # Registration ID, used to register the application in SAML 
-      entity-id: "urn:eiam.admin.ch:sp:MyApplication" # Entity ID (can be templated), optional and defaults to "{baseUrl}/saml2/service-provider-metadata/{registrationId}"
+      entity-id: "urn:test.server.com:sp:MyApplication" # Entity ID (can be templated), optional and defaults to "{baseUrl}/saml2/service-provider-metadata/{registrationId}"
       basic-auth-users: # Optional: configuration to be able to do basic-auth call's (for example for API calls)
         admin:
           password: "{bcrypt}$2a$12$.6Mn9xZi5a1vwCBtH6Yy4ulmoTr8qvoS9tgZTk/UXy/OOwa4r14cG"
@@ -75,8 +76,11 @@ cognizone:
           roles:
             - view
 ```
-_Note: if basic-auth users are passed, they will only be taken into account if the correct basic-auth header is passed.
+_Note1: if **basic-auth** users are passed, they will only be taken into account if the correct basic-auth header is passed.
 If the header is incorrect (no user, wrong password,...), this will just be ignored._
+
+_Note2: if you want to use **{registrationId}** in your **assertionConsumerServiceUrl**, 
+this has to be at the end of the url and as a separate path part._
 ### JSON role mapping file example
 ```json
 {
@@ -113,6 +117,13 @@ cognizone:
           roles:  #roles are optional
             - view
 ```
+## Password encryption
+For validation of encrypted passwords in the config files the default `"DelegatingPasswordEncoder"` of spring is used. So different encodings can be used. More information can be found here:
+- https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html#authentication-password-storage-dpe
+- https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/crypto/factory/PasswordEncoderFactories.html
+
+In the configuration examples, the bcrypt encoded passwords represent plain password "_admin_". 
+
 ## Configure Logout
 ```yaml
 cognizone:
