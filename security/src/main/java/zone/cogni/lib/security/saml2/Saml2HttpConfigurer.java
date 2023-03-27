@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.saml2.Saml2LoginConfigurer;
 import org.springframework.security.core.Authentication;
@@ -32,8 +31,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -69,33 +66,12 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     if (StringUtils.isBlank(assertionConsumerServiceUrl) || assertionConsumerServiceUrl.endsWith("/{registrationId}")) return;
 
     RelyingPartyRegistration registrationId = relyingPartyRegistrationRepository.findByRegistrationId(saml2Properties.getRegistrationId());
-    ObjectPostProcessor<Saml2WebSsoAuthenticationFilter> patchSaml2WebSsoAuthenticationFilterProcessor = new ObjectPostProcessor<>() {
-      @Override
-      public <O extends Saml2WebSsoAuthenticationFilter> O postProcess(O filter) {
-        String assertionConsumerServicePath = getAssertionConsumerServicePath();
-        log.info("Will patch assertionConsumerServicePath in Saml2WebSsoAuthenticationFilter with {}", assertionConsumerServicePath);
-        filter.setFilterProcessesUrl(assertionConsumerServicePath);
-        return filter;
-      }
-
-      private String getAssertionConsumerServicePath() {
-        try {
-          String path = new URL(assertionConsumerServiceUrl).getPath();
-          if (!path.startsWith(contextPath)) throw new RuntimeException("Path of AssertionConsumerServiceUrl does not start with " + contextPath);
-          return "/" + StringUtils.removeStart(path, contextPath);
-        }
-        catch (MalformedURLException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
-
     httpSecuritySaml2LoginConfigurer.authenticationConverter(new NoRegistrationIdSaml2AuthenticationTokenConverter(registrationId))
-                                    .addObjectPostProcessor(patchSaml2WebSsoAuthenticationFilterProcessor);
+                                    .addObjectPostProcessor(new Saml2WebSsoAuthenticationFilterAssertionConsumerServiceSetter(assertionConsumerServiceUrl, contextPath));
   }
 
   @Override
-  public void configure(HttpSecurity http) {
+  public void configure(HttpSecurity builder) {
   }
 
   private void basicAuthFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
