@@ -117,6 +117,13 @@ cognizone:
           roles:  #roles are optional
             - view
 ```
+## Password encryption
+For validation of encrypted passwords in the config files the default `"DelegatingPasswordEncoder"` of spring is used. So different encodings can be used. More information can be found here:
+- https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html#authentication-password-storage-dpe
+- https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/crypto/factory/PasswordEncoderFactories.html
+
+In the configuration examples, the bcrypt encoded passwords represent plain password "_admin_". 
+
 ## Configure Logout
 ```yaml
 cognizone:
