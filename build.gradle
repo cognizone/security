@@ -33,9 +33,11 @@ scmVersion {
 
 ext {
   asquareVersion = "0.6.4"
-  snakeyamlVersion = "1.33"
+  assertJVersion = "3.24.2"
   commonsCollectionsVersion = "4.4"
   commonsLang3Version = "3.12.0"
+  junitVersion = "5.9.2"
+  snakeyamlVersion = "1.33"
 }
 
 idea {
@@ -102,6 +104,12 @@ project("security") {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-security')
     implementation('org.springframework.security:spring-security-saml2-service-provider')
+
+    //test
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
+    testImplementation("org.assertj:assertj-core:${assertJVersion}")
   }
 
   publishing {

@@ -22,6 +22,7 @@ import org.springframework.security.saml2.provider.service.web.DefaultRelyingPar
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
+import zone.cogni.lib.security.DefaultUserDetails;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
@@ -83,8 +84,8 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
     if (authentication instanceof Saml2Authentication) {
-      List<GrantedAuthority> authorities = getAuthorities((Saml2AuthenticatedPrincipal) authentication.getPrincipal());
-      ExtendedSaml2Authentication patchedAuthentication = new ExtendedSaml2Authentication(authorities, (Saml2Authentication) authentication);
+      DefaultUserDetails samlUserDetails = buildUserDetails((Saml2AuthenticatedPrincipal) authentication.getPrincipal());
+      ExtendedSaml2Authentication patchedAuthentication = new ExtendedSaml2Authentication(samlUserDetails, (Saml2Authentication) authentication);
       securityContext.setAuthentication(patchedAuthentication);
 
       if (BooleanUtils.isTrue(saml2Properties.getLogSamlResponse())) log.info("Received saml response: {}", patchedAuthentication.getSaml2Response());
@@ -94,6 +95,20 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     }
 
     chain.doFilter(request, response);
+  }
+
+  private DefaultUserDetails buildUserDetails(Saml2AuthenticatedPrincipal principal) {
+    DefaultUserDetails samlUserDetails = new DefaultUserDetails();
+    Saml2Properties.Attributes samlAttributes = saml2Properties.getAttributes();
+
+    String loginId = StringUtils.defaultIfBlank(principal.getFirstAttribute(samlAttributes.getLoginid()), principal.getName());
+
+    samlUserDetails.setAuthorities(getAuthorities(principal))
+                   .setLoginId(loginId)
+                   .setUsername(loginId)
+                   .setEmail(principal.getFirstAttribute(samlAttributes.getEmail()))
+                   .setDisplayName(principal.getFirstAttribute(samlAttributes.getDisplayname()));
+    return samlUserDetails;
   }
 
   private List<GrantedAuthority> getAuthorities(Saml2AuthenticatedPrincipal principal) {

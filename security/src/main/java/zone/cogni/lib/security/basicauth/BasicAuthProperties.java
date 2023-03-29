@@ -16,6 +16,8 @@ public class BasicAuthProperties {
   @Data
   public static class User {
     private String password;
+    private String displayName;
+    private String email;
     private List<String> roles = new ArrayList<>(); //init so we allow empty config
   }
 

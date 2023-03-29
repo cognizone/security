@@ -1,0 +1,14 @@
+cognizone:
+  security:
+    auth-method: basic
+    basic-auth:
+      users:
+        admin:
+          displayName: "el adminos"
+          email: "mail@admin.com"
+          password: "{bcrypt}$2a$12$.6Mn9xZi5a1vwCBtH6Yy4ulmoTr8qvoS9tgZTk/UXy/OOwa4r14cG" # admin
+          roles:
+            - admin
+            - batman
+        anon:
+          password: "{noop}zopzop"
