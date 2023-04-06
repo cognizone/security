@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
+import zone.cogni.lib.security.DefaultUserDetails;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -36,9 +38,18 @@ public class BasicAuthHandler {
 
     if (!passwordEncoder.matches((CharSequence) requestUsernamePassword.getCredentials(), user.getPassword())) return;
 
-    List<SimpleGrantedAuthority> authorities = user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-    Authentication authentication = new UsernamePasswordAuthenticationToken(requestUsernamePassword.getName(), "*******", authorities);
+    List<GrantedAuthority> authorities = user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(requestUsernamePassword.getName(), "*******", authorities);
+    authentication.setDetails(buildDefaultUserDetails(requestUsernamePassword.getName(), authorities));
     SecurityContextHolder.getContext().setAuthentication(authentication);
+  }
+
+  private DefaultUserDetails buildDefaultUserDetails(String username, List<GrantedAuthority> authorities) {
+    return new DefaultUserDetails()
+            .setAuthorities(authorities)
+            .setDisplayName("API: " + username)
+            .setLoginId(username)
+            .setUsername(username);
   }
 
   private UsernamePasswordAuthenticationToken parseRequest(HttpServletRequest request) {

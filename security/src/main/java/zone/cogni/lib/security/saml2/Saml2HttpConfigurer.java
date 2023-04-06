@@ -90,8 +90,8 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
 
       if (BooleanUtils.isTrue(saml2Properties.getLogSamlResponse())) log.info("Received saml response: {}", patchedAuthentication.getSaml2Response());
     }
-    else if (null != authentication && !(authentication instanceof ExtendedSaml2Authentication)) {
-      log.warn("Authentication object is not instanceof (Extended)Saml2Authentication: {}", authentication.getClass());
+    else if (null != authentication && !(authentication.getDetails() instanceof DefaultUserDetails)) {
+      log.warn("Authentication object is not a security lib one or SAML one: {}", authentication.getClass());
     }
 
     chain.doFilter(request, response);
@@ -107,7 +107,9 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
                    .setLoginId(loginId)
                    .setUsername(loginId)
                    .setEmail(principal.getFirstAttribute(samlAttributes.getEmail()))
-                   .setDisplayName(principal.getFirstAttribute(samlAttributes.getDisplayname()));
+                   .setDisplayName(principal.getFirstAttribute(samlAttributes.getDisplayname()))
+                   .setFirstName(principal.getFirstAttribute(samlAttributes.getFirstname()))
+                   .setLastName(principal.getFirstAttribute(samlAttributes.getLastname()));
     return samlUserDetails;
   }
 
