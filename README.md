@@ -11,7 +11,7 @@
 public class WebSecurityConfig {
 
   //Inject this using your favorite way
-  private final SecurityHttpConfigurer<? extends AsquareHttpConfigurer> security2HttpConfigurer;
+  private final SecurityHttpConfigurer<? extends SecurityHttpConfigurer> security2HttpConfigurer;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
