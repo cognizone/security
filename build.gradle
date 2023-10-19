@@ -56,8 +56,19 @@ subprojects {
   sourceCompatibility = '11'
 
   repositories {
+    if (project.hasProperty('jenkins-ci')) {
+      maven {
+        url "${System.properties['nexus.url']}/repository/cognizone-group"
+        credentials {
+          username = System.properties['nexus.username']
+          password = System.properties['nexus.password']
+        }
+        allowInsecureProtocol(true)
+      }
+    }
     mavenLocal()
     mavenCentral()
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://repo.spring.io/milestone" }
     maven { url "https://archiva.cogni.zone/repository/public" }
   }
@@ -115,13 +126,27 @@ project("security") {
       }
     }
     repositories {
-      maven {
-        credentials {
-          username = System.properties['archiva.user']
-          password = System.properties['archiva.password']
+      if (project.hasProperty("publishToCognizoneArchiva")) {
+        maven {
+          credentials {
+            username = System.properties['archiva.username']
+            password = System.properties['archiva.password']
+          }
+          name = 'cognizone'
+          url = System.properties['archiva.url']
         }
-        name = 'public'
-        url = System.properties['archiva.url']
+      }
+      if (project.hasProperty("publishToCognizoneNexus")) {
+        maven {
+          credentials {
+            username = System.properties['nexus.username']
+            password = System.properties['nexus.password']
+          }
+          def releasesRepoUrl = "${System.properties['nexus.url']}/repository/cognizone-release"
+          def snapshotsRepoUrl = "${System.properties['nexus.url']}/repository/cognizone-snapshot"
+          url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+          allowInsecureProtocol(true)
+        }
       }
     }
   }
