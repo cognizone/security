@@ -1,20 +1,22 @@
-package zone.cogni.lib.security.saml2;
+package zone.cogni.lib.security.common;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
 import zone.cogni.lib.security.DefaultUserDetails;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -24,32 +26,29 @@ public class BasicAuthHandler {
   private static final BasicAuthenticationConverter basicAuthenticationConverter = new BasicAuthenticationConverter();
   private static final PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
-  private final Saml2Properties saml2Properties;
+  private final Map<String, BasicAuthUser> basicAuthUsers;
 
-  public void handle(HttpServletRequest request) {
+  public void handleFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+    handle((HttpServletRequest) request);
+    chain.doFilter(request, response);
+  }
+
+  private void handle(HttpServletRequest request) {
     Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
     if (null != currentAuthentication && currentAuthentication.isAuthenticated()) return;
 
     UsernamePasswordAuthenticationToken requestUsernamePassword = parseRequest(request);
     if (null == requestUsernamePassword) return;
 
-    Saml2Properties.User user = saml2Properties.getBasicAuthUsers().get(requestUsernamePassword.getName());
+    BasicAuthUser user = basicAuthUsers.get(requestUsernamePassword.getName());
     if (null == user) return;
 
     if (!passwordEncoder.matches((CharSequence) requestUsernamePassword.getCredentials(), user.getPassword())) return;
 
-    List<GrantedAuthority> authorities = user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(requestUsernamePassword.getName(), "*******", authorities);
-    authentication.setDetails(buildDefaultUserDetails(requestUsernamePassword.getName(), authorities));
+    DefaultUserDetails defaultUserDetails = user.toDefaultUserDetails(requestUsernamePassword.getName());
+    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(requestUsernamePassword.getName(), "*******", defaultUserDetails.getAuthorities());
+    authentication.setDetails(defaultUserDetails);
     SecurityContextHolder.getContext().setAuthentication(authentication);
-  }
-
-  private DefaultUserDetails buildDefaultUserDetails(String username, List<GrantedAuthority> authorities) {
-    return new DefaultUserDetails()
-            .setAuthorities(authorities)
-            .setDisplayName("API: " + username)
-            .setLoginId(username)
-            .setUsername(username);
   }
 
   private UsernamePasswordAuthenticationToken parseRequest(HttpServletRequest request) {

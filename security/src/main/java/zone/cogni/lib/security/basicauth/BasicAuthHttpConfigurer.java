@@ -13,8 +13,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import zone.cogni.lib.security.SecurityHttpConfigurer;
 import zone.cogni.lib.security.DefaultUserDetails;
+import zone.cogni.lib.security.SecurityHttpConfigurer;
+import zone.cogni.lib.security.common.BasicAuthUser;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
@@ -52,13 +53,13 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
                                   .collect(Collectors.toMap(DefaultUserDetails::getUsername, Function.identity()));
   }
 
-  private void addUser(InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer, String userName, BasicAuthProperties.User user) {
+  private void addUser(InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer, String userName, BasicAuthUser user) {
     configurer.withUser(userName)
               .password(user.getPassword())
               .authorities(user.getRoles().toArray(emptyStringArray));
   }
 
-  private DefaultUserDetails convertToUserDetails(String username, BasicAuthProperties.User user) {
+  private DefaultUserDetails convertToUserDetails(String username, BasicAuthUser user) {
     return new DefaultUserDetails()
             .setAuthorities(user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()))
             .setUsername(username)

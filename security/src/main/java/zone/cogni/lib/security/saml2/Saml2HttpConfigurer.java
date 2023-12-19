@@ -21,8 +21,9 @@ import org.springframework.security.saml2.provider.service.servlet.filter.Saml2W
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
-import zone.cogni.lib.security.SecurityHttpConfigurer;
 import zone.cogni.lib.security.DefaultUserDetails;
+import zone.cogni.lib.security.SecurityHttpConfigurer;
+import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
@@ -30,7 +31,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +57,7 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     checkAssertionConsumerServiceUrl(httpSecuritySaml2LoginConfigurer);
     http
             .apply(new LogoutConfigurer(globalProperties.getLogout())).and()
-            .addFilterBefore(this::basicAuthFilter, Saml2WebSsoAuthenticationFilter.class)
+            .addFilterBefore(basicAuthHandler::handleFilter, Saml2WebSsoAuthenticationFilter.class)
             .addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class)
             .addFilterAfter(this::patchAuthenticationObjectFilter, Saml2WebSsoAuthenticationFilter.class);
   }
@@ -75,10 +75,6 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
   public void configure(HttpSecurity builder) {
   }
 
-  private void basicAuthFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
-    basicAuthHandler.handle((HttpServletRequest) request);
-    chain.doFilter(request, response);
-  }
 
   private void patchAuthenticationObjectFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     SecurityContext securityContext = SecurityContextHolder.getContext();

@@ -13,6 +13,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import zone.cogni.core.spring.ResourceHelper;
+import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.PermissionGlobalMethodSecurityConfiguration;
 
 import java.io.InputStream;
@@ -48,7 +49,7 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
 
   @Bean
   public BasicAuthHandler basicAuthHandler() {
-    return new BasicAuthHandler(saml2Properties());
+    return new BasicAuthHandler(saml2Properties().getBasicAuthUsers());
   }
 
   @Bean

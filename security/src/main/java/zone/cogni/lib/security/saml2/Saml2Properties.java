@@ -2,10 +2,9 @@ package zone.cogni.lib.security.saml2;
 
 import lombok.Data;
 import lombok.ToString;
+import zone.cogni.lib.security.common.BasicAuthUser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -20,7 +19,7 @@ public class Saml2Properties {
   private Attributes attributes;
   private String roleMappingUrl;
   private Boolean logSamlResponse;
-  private Map<String, User> basicAuthUsers = new HashMap<>(); //init so we allow empty config
+  private Map<String, BasicAuthUser> basicAuthUsers = new HashMap<>(); //init so we allow empty config
 
   public enum KeyStoreType {JKS}
 
@@ -45,10 +44,4 @@ public class Saml2Properties {
     private String email;
   }
 
-  @Data
-  public static class User {
-    @ToString.Exclude
-    private String password;
-    private List<String> roles = new ArrayList<>(); //init so we allow empty config
-  }
 }

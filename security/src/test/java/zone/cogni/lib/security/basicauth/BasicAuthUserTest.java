@@ -3,31 +3,27 @@ package zone.cogni.lib.security.basicauth;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
-import zone.cogni.lib.security.BasicActionsTestController;
-import zone.cogni.lib.security.GoSecurityTest;
+import zone.cogni.lib.security.DefaultTestController;
 import zone.cogni.lib.security.DefaultUserDetails;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
+import zone.cogni.lib.security.GoSecurityTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = BasicActionsTestController.class)
+@SpringBootTest(classes = DefaultTestController.class)
 @ActiveProfiles("test-basic-auth-1")
-public class BasicAuthUserTest extends GoSecurityTest {
+class BasicAuthUserTest extends GoSecurityTest {
 
   @Test
-  public void testAdminUser() throws Exception {
+  void testAdminUser() throws Exception {
     mockMvc.perform(post("/private/rememberAuthentication")
                             .with(httpBasic("admin", "admin")))
            .andExpect(status().isOk());
 
-    assertThat(BasicActionsTestController.authentication)
+    assertThat(DefaultTestController.authentication)
             .isNotNull()
             .extracting(Authentication::getDetails)
             .isInstanceOf(DefaultUserDetails.class)
@@ -43,12 +39,12 @@ public class BasicAuthUserTest extends GoSecurityTest {
   }
 
   @Test
-  public void testAnonUser() throws Exception {
+  void testAnonUser() throws Exception {
     mockMvc.perform(post("/private/rememberAuthentication")
                             .with(httpBasic("anon", "zopzop")))
            .andExpect(status().isOk());
 
-    assertThat(BasicActionsTestController.authentication)
+    assertThat(DefaultTestController.authentication)
             .isNotNull()
             .extracting(Authentication::getDetails)
             .isInstanceOf(DefaultUserDetails.class)
@@ -62,14 +58,4 @@ public class BasicAuthUserTest extends GoSecurityTest {
     checkRoles();
   }
 
-  private void checkRoles(String... roles) {
-    Collection<? extends GrantedAuthority> authorities = BasicActionsTestController.authentication.getAuthorities();
-    DefaultUserDetails userDetails = (DefaultUserDetails) BasicActionsTestController.authentication.getDetails();
-    assertThat(authorities)
-            .isEqualTo(userDetails.getAuthorities());
-
-    Collection<String> stringizedList = authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-    assertThat(stringizedList).hasSize(roles.length)
-                              .contains(roles);
-  }
 }
