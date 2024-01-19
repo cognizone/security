@@ -50,10 +50,17 @@ subprojects {
   apply plugin: 'idea'
   apply plugin: "io.freefair.lombok"
   apply plugin: 'io.spring.dependency-management'
+  apply plugin: "maven-publish"
+  apply plugin: 'signing'
 
   group = 'zone.cogni.lib.security'
   version = scmVersion.version
   sourceCompatibility = '11'
+
+  java {
+        withJavadocJar()
+        withSourcesJar()
+    }
 
   repositories {
     if (project.hasProperty('jenkins-ci')) {
@@ -122,9 +129,43 @@ project("security") {
         artifactId = 'security'
         version = scmVersion.version
         from components.java
-        artifact sourcesJar
-      }
-    }
+
+        pom {
+                    name = "${project.name}"
+                    packaging = 'jar'
+                    // optionally artifactId can be defined here
+                    description = 'Cognizone Security'
+                    url = '<https://github.com/cognizone/security>'
+
+                    scm {
+                        connection = 'scm:git:git@<https://github.com/cognizone/security.git>'
+                        developerConnection = 'scm:git:git@github.com:cognizone/security.git'
+                        url = '<https://github.com/cognizone/security>'
+                    }
+
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = '<http://www.apache.org/licenses/LICENSE-2.0.txt>'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'cognizone'
+                            name = 'Cognizone'
+                            email = 'cognizone-lib-dev@cogni.zone'
+                        }
+                    }
+                }
+            }
+        }
+
+    
+
+
+
+
     repositories {
       if (project.hasProperty("publishToCognizoneArchiva")) {
         maven {
@@ -148,6 +189,27 @@ project("security") {
           allowInsecureProtocol(true)
         }
       }
+      if (project.hasProperty("publishToMavenCentral")) {
+                maven {
+                    credentials {
+                        username = System.properties['ossrh.username']
+                        password = System.properties['ossrh.password']
+                    }
+                    // Define repository URLs based on the version
+                    def stagingRepoUrl = "${System.properties['ossrh.url']}/service/local/staging/deploy/maven2"
+                    def snapshotsRepoUrl = "${System.properties['ossrh.url']}/content/repositories/snapshots"
+                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : stagingRepoUrl
+                }
+            }
+        }
+    }
+    signing {
+    if (project.hasProperty("publishToMavenCentral")) {
+      sign publishing.publications.mavenJava
     }
   }
+
+  
+
+
 }
