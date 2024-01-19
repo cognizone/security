@@ -204,7 +204,8 @@ project("security") {
     }
   }
 
-  
-
-
+  tasks.withType(Javadoc) {
+        failOnError false
+    }
 }
+
