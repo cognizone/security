@@ -86,11 +86,6 @@ subprojects {
     }
   }
 
-  task sourcesJar(type: Jar) {
-    description = 'Creates sources JAR.'
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
-  }
 
   tasks.named('test') {
     useJUnitPlatform()
