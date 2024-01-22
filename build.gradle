@@ -13,7 +13,6 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url "https://repo.spring.io/milestone" }
-  maven { url "https://archiva.cogni.zone/repository/public" }
 }
 
 scmVersion {
@@ -32,7 +31,7 @@ scmVersion {
 }
 
 ext {
-  asquareVersion = "0.6.4"
+  asquareVersion = "0.6.18"
   snakeyamlVersion = "1.33"
   commonsCollectionsVersion = "4.4"
   commonsLang3Version = "3.12.0"
@@ -58,9 +57,9 @@ subprojects {
   sourceCompatibility = '11'
 
   java {
-        withJavadocJar()
-        withSourcesJar()
-    }
+    withJavadocJar()
+    withSourcesJar()
+  }
 
   repositories {
     if (project.hasProperty('jenkins-ci')) {
@@ -77,7 +76,6 @@ subprojects {
     mavenCentral()
     maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://repo.spring.io/milestone" }
-    maven { url "https://archiva.cogni.zone/repository/public" }
   }
 
   dependencyManagement {
@@ -126,51 +124,39 @@ project("security") {
         from components.java
 
         pom {
-                    name = "${project.name}"
-                    packaging = 'jar'
-                    // optionally artifactId can be defined here
-                    description = 'Cognizone Security'
-                    url = '<https://github.com/cognizone/security>'
+          name = "${project.name}"
+          packaging = 'jar'
+          // optionally artifactId can be defined here
+          description = 'Cognizone Security'
+          url = '<https://github.com/cognizone/security>'
 
-                    scm {
-                        connection = 'scm:git:git@<https://github.com/cognizone/security.git>'
-                        developerConnection = 'scm:git:git@github.com:cognizone/security.git'
-                        url = '<https://github.com/cognizone/security>'
-                    }
+          scm {
+            connection = 'scm:git:git@<https://github.com/cognizone/security.git>'
+            developerConnection = 'scm:git:git@github.com:cognizone/security.git'
+            url = '<https://github.com/cognizone/security>'
+          }
 
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = '<http://www.apache.org/licenses/LICENSE-2.0.txt>'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = 'cognizone'
-                            name = 'Cognizone'
-                            email = 'cognizone-lib-dev@cogni.zone'
-                        }
-                    }
-                }
+          licenses {
+            license {
+              name = 'The Apache License, Version 2.0'
+              url = '<http://www.apache.org/licenses/LICENSE-2.0.txt>'
             }
+          }
+
+          developers {
+            developer {
+              id = 'cognizone'
+              name = 'Cognizone'
+              email = 'cognizone-lib-dev@cogni.zone'
+            }
+          }
         }
-
-    
-
-
-
+      }
+    }
 
     repositories {
       if (project.hasProperty("publishToCognizoneArchiva")) {
-        maven {
-          credentials {
-            username = System.properties['archiva.username']
-            password = System.properties['archiva.password']
-          }
-          name = 'cognizone'
-          url = System.properties['archiva.url']
-        }
+        throw new GradleException("Publish to cognizone archiva is deprecated")
       }
       if (project.hasProperty("publishToCognizoneNexus")) {
         maven {
@@ -185,27 +171,27 @@ project("security") {
         }
       }
       if (project.hasProperty("publishToMavenCentral")) {
-                maven {
-                    credentials {
-                        username = System.properties['ossrh.username']
-                        password = System.properties['ossrh.password']
-                    }
-                    // Define repository URLs based on the version
-                    def stagingRepoUrl = "${System.properties['ossrh.url']}/service/local/staging/deploy/maven2"
-                    def snapshotsRepoUrl = "${System.properties['ossrh.url']}/content/repositories/snapshots"
-                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : stagingRepoUrl
-                }
-            }
+        maven {
+          credentials {
+            username = System.properties['ossrh.username']
+            password = System.properties['ossrh.password']
+          }
+          // Define repository URLs based on the version
+          def stagingRepoUrl = "${System.properties['ossrh.url']}/service/local/staging/deploy/maven2"
+          def snapshotsRepoUrl = "${System.properties['ossrh.url']}/content/repositories/snapshots"
+          url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : stagingRepoUrl
         }
+      }
     }
-    signing {
+  }
+  signing {
     if (project.hasProperty("publishToMavenCentral")) {
       sign publishing.publications.mavenJava
     }
   }
 
   tasks.withType(Javadoc) {
-        failOnError false
-    }
+    failOnError false
+  }
 }
 
