@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
 import zone.cogni.lib.security.basicauth.EnableSecurityBasicAuth;
+import zone.cogni.lib.security.generic.EnableSecurityGeneric;
 import zone.cogni.lib.security.off.EnableSecurityOff;
 import zone.cogni.lib.security.saml2.EnableSecuritySaml2;
 
@@ -39,6 +40,12 @@ public class SecurityConfiguration {
   }
 
   @Configuration
+  @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "generic")
+  @EnableSecurityGeneric
+  public static class GenericGenericConfiguration {
+  }
+
+  @Configuration
   @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "off")
   @EnableSecurityOff
   public static class GenericOffConfiguration {
@@ -55,7 +62,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityHttpConfigurer<? extends SecurityHttpConfigurer> securityHttpConfigurer() {
       if (StringUtils.isBlank(authenticationMethod)) throw new RuntimeException("No authentication method specified via property 'cognizone.security.auth-method'.");
-      else throw new RuntimeException("Value '" + authenticationMethod + "' of property 'cognizone.security.auth-method' not supported, use one of basic, saml2.");
+      else throw new RuntimeException("Value '" + authenticationMethod + "' of property 'cognizone.security.auth-method' not supported, use one of basic, saml2, generic or off");
     }
   }
 
@@ -71,6 +78,10 @@ public class SecurityConfiguration {
 
     @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "saml2")
     static class Saml2Condition {
+    }
+
+    @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "generic")
+    static class GenericCondition {
     }
 
     @ConditionalOnProperty(name = "cognizone.security.auth-method", havingValue = "off")

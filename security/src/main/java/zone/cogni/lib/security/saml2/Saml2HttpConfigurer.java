@@ -21,7 +21,9 @@ import org.springframework.security.saml2.provider.service.servlet.filter.Saml2W
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
+import zone.cogni.lib.security.DefaultUserDetails;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
+import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
@@ -29,7 +31,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +57,7 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     checkAssertionConsumerServiceUrl(httpSecuritySaml2LoginConfigurer);
     http
             .apply(new LogoutConfigurer(globalProperties.getLogout())).and()
-            .addFilterBefore(this::basicAuthFilter, Saml2WebSsoAuthenticationFilter.class)
+            .addFilterBefore(basicAuthHandler::handleFilter, Saml2WebSsoAuthenticationFilter.class)
             .addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class)
             .addFilterAfter(this::patchAuthenticationObjectFilter, Saml2WebSsoAuthenticationFilter.class);
   }
@@ -74,26 +75,38 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
   public void configure(HttpSecurity builder) {
   }
 
-  private void basicAuthFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
-    basicAuthHandler.handle((HttpServletRequest) request);
-    chain.doFilter(request, response);
-  }
 
   private void patchAuthenticationObjectFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
     if (authentication instanceof Saml2Authentication) {
-      List<GrantedAuthority> authorities = getAuthorities((Saml2AuthenticatedPrincipal) authentication.getPrincipal());
-      ExtendedSaml2Authentication patchedAuthentication = new ExtendedSaml2Authentication(authorities, (Saml2Authentication) authentication);
+      DefaultUserDetails samlUserDetails = buildUserDetails((Saml2AuthenticatedPrincipal) authentication.getPrincipal());
+      ExtendedSaml2Authentication patchedAuthentication = new ExtendedSaml2Authentication(samlUserDetails, (Saml2Authentication) authentication);
       securityContext.setAuthentication(patchedAuthentication);
 
       if (BooleanUtils.isTrue(saml2Properties.getLogSamlResponse())) log.info("Received saml response: {}", patchedAuthentication.getSaml2Response());
     }
-    else if (null != authentication && !(authentication instanceof ExtendedSaml2Authentication)) {
-      log.warn("Authentication object is not instanceof (Extended)Saml2Authentication: {}", authentication.getClass());
+    else if (null != authentication && !(authentication.getDetails() instanceof DefaultUserDetails)) {
+      log.warn("Authentication object is not a security lib one or SAML one: {}", authentication.getClass());
     }
 
     chain.doFilter(request, response);
+  }
+
+  private DefaultUserDetails buildUserDetails(Saml2AuthenticatedPrincipal principal) {
+    DefaultUserDetails samlUserDetails = new DefaultUserDetails();
+    Saml2Properties.Attributes samlAttributes = saml2Properties.getAttributes();
+
+    String loginId = StringUtils.defaultIfBlank(principal.getFirstAttribute(samlAttributes.getLoginid()), principal.getName());
+
+    samlUserDetails.setAuthorities(getAuthorities(principal))
+                   .setLoginId(loginId)
+                   .setUsername(loginId)
+                   .setEmail(principal.getFirstAttribute(samlAttributes.getEmail()))
+                   .setDisplayName(principal.getFirstAttribute(samlAttributes.getDisplayname()))
+                   .setFirstName(principal.getFirstAttribute(samlAttributes.getFirstname()))
+                   .setLastName(principal.getFirstAttribute(samlAttributes.getLastname()));
+    return samlUserDetails;
   }
 
   private List<GrantedAuthority> getAuthorities(Saml2AuthenticatedPrincipal principal) {

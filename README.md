@@ -68,6 +68,8 @@ cognizone:
       basic-auth-users: # Optional: configuration to be able to do basic-auth call's (for example for API calls)
         admin:
           password: "{bcrypt}$2a$12$.6Mn9xZi5a1vwCBtH6Yy4ulmoTr8qvoS9tgZTk/UXy/OOwa4r14cG"
+          displayName: "el adminos" # optional values which can be used as displayName
+          email: "mail@admin.com"   # optional 
           roles:
             - admin
             - view
@@ -133,6 +135,11 @@ cognizone:
         url: /api/logout    # URL to use to trigger logout, 
         success-url: https://www.gruutemet.be/  # [OPTIONAL] URL to go to after successful logout (logout URL has to be set)
 ```
+
+## User details
+The method `getDetails()` on `org.springframework.security.core.Authentication` will return a `zone.cogni.lib.security.DefaultUserDetails` object.
+This object contains data like displayName and email (if available ofc).
+
 ## PermissionService
 To enable just add this config:
 ````yaml
