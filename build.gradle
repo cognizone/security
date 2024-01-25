@@ -54,7 +54,7 @@ subprojects {
   apply plugin: "maven-publish"
   apply plugin: 'signing'
 
-  group = 'zone.cogni.lib.security'
+  group = 'zone.cogni'
   version = scmVersion.version
   sourceCompatibility = '11'
 
