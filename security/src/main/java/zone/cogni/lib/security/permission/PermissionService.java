@@ -1,9 +1,11 @@
 package zone.cogni.lib.security.permission;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,9 +30,14 @@ public class PermissionService {
   private final Map<String, Set<String>> roleName2permissionString = Collections.synchronizedMap(new HashMap<>());
   private final Set<String> defaultPermissionStrings;
   private final Map<String, Permission> permissionByName;
+  private final Map<String, String> ldap2roleName = new HashMap<>();
+  @Value("${lux.ldap.role.group.resource:/ldap-role-group.json}")
+  private String ldapRoleGroupResource;
 
   @SneakyThrows
   public PermissionService(Resource roleAccess) {
+    readLdapResource();
+
     log.info("Reading roleAccess {}", roleAccess.getFilename());
     try (InputStream inputStream = roleAccess.getInputStream()) {
       Map<?, ?> jsonData = new ObjectMapper().readValue(inputStream, Map.class);
@@ -52,6 +60,27 @@ public class PermissionService {
 
     permissionByName = Collections.synchronizedMap(initPermissionsByName());
     log.info("Role names for permissions {}", roleName2permissionString);
+  }
+
+  public Optional<String> getRoleNameForLdapGroup(String ldapGroup) {
+    return Optional.ofNullable(ldap2roleName.get(StringUtils.lowerCase(ldapGroup.toLowerCase())));
+  }
+
+  public Set<String> getRoleNames() {
+    return roleName2permissionString.keySet();
+  }
+
+  @SneakyThrows
+  private void readLdapResource() {
+    if (StringUtils.isBlank(ldapRoleGroupResource)) return;
+    log.info("Using ldapRoleGroupResource '{}'", ldapRoleGroupResource);
+    try (InputStream inputStream = PermissionService.class.getResourceAsStream(ldapRoleGroupResource)) {
+      Map<String, String> jsonData = new ObjectMapper().enable(JsonParser.Feature.ALLOW_COMMENTS)
+                                                       .readValue(inputStream, Map.class);
+      for (Map.Entry<String, String> entry : jsonData.entrySet()) {
+        ldap2roleName.put(StringUtils.lowerCase(entry.getKey()), StringUtils.lowerCase(entry.getValue()));
+      }
+    }
   }
 
   private Map<String, Permission> initPermissionsByName() {
