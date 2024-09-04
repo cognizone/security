@@ -79,7 +79,7 @@ public class PermissionService {
     return result;
   }
 
-  private void readRoles(Map<?,?> jsonData) {
+  private void readRoles(Map<?, ?> jsonData) {
     @SuppressWarnings("unchecked")
     Map<String, Map<String, Object>> roles = (Map<String, Map<String, Object>>) jsonData.get("roles");
     if (null == roles) {
@@ -95,9 +95,12 @@ public class PermissionService {
     }
   }
 
-  private void setNotBlacklisted(Map<String, Object> values, String role){
+  private void setNotBlacklisted(Map<String, Object> values, String role) {
     if (values.containsKey("notBlacklisted")) {
-      Set<String> notBlacklisted = ((Collection<String>) values.get("notBlacklisted")).stream().map(blacklistProperties::get).flatMap(Collection::stream).collect(Collectors.toSet());
+      Set<String> notBlacklisted = ((Collection<String>) values.get("notBlacklisted")).stream()
+                                                                                      .map(blacklistProperties::get)
+                                                                                      .flatMap(Collection::stream)
+                                                                                      .collect(Collectors.toSet());
       notBlacklistedForRole.put(role, notBlacklisted);
     }
     else {
