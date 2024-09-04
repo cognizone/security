@@ -31,6 +31,10 @@ public class PermissionService {
   private final Set<String> defaultPermissionStrings;
   private final Map<String, Permission> permissionByName;
   private final Map<String, String> ldap2roleName = new HashMap<>();
+  private final Map<String, Set<String>> blacklistProperties = new HashMap<>();
+  private final Set<String> allBlacklistProperties;
+  private final Map<String, Set<String>> notBlacklistedForRole = new HashMap<>();
+
   @Value("${lux.ldap.role.group.resource:/ldap-role-group.json}")
   private String ldapRoleGroupResource;
 
@@ -43,21 +47,14 @@ public class PermissionService {
       Map<?, ?> jsonData = new ObjectMapper().readValue(inputStream, Map.class);
 
       defaultPermissionStrings = Collections.synchronizedSet(jsonArray2ProjectPermissionStringSet(jsonData.get("rulesDefault")));
-
-      @SuppressWarnings("unchecked")
-      Map<String, Map<String, Object>> roles = (Map<String, Map<String, Object>>) jsonData.get("roles");
-      if (null == roles) {
-        log.warn("No roles found in roleAccess file");
-      }
-      else {
-        for (Map.Entry<String, Map<String, Object>> entry : roles.entrySet()) {
-          String role = entry.getKey();
-          Map<String, Object> values = entry.getValue();
-          roleName2permissionString.put(StringUtils.lowerCase(role), jsonArray2ProjectPermissionStringSet(values.get("rules")));
-        }
-      }
+      setBlacklistProperties((Map) jsonData.get("blacklistProperties"));
+      readRoles(jsonData);
     }
 
+    allBlacklistProperties = Collections.synchronizedSet(blacklistProperties.values()
+                                                                            .stream()
+                                                                            .flatMap(Collection::stream)
+                                                                            .collect(Collectors.toSet()));
     permissionByName = Collections.synchronizedMap(initPermissionsByName());
     log.info("Role names for permissions {}", roleName2permissionString);
   }
@@ -68,6 +65,44 @@ public class PermissionService {
 
   public Set<String> getRoleNames() {
     return roleName2permissionString.keySet();
+  }
+
+
+  public Set<String> getBlacklistedProperties(Authentication authentication) {
+    Set<String> notBlacklistProperties = getRoles(authentication).stream()
+                                                                 .map(notBlacklistedForRole::get)
+                                                                 .filter(Objects::nonNull)
+                                                                 .flatMap(Collection::stream)
+                                                                 .collect(Collectors.toSet());
+    Set<String> result = new HashSet<>(allBlacklistProperties);
+    result.removeAll(notBlacklistProperties);
+    return result;
+  }
+
+  private void readRoles(Map<?,?> jsonData) {
+    @SuppressWarnings("unchecked")
+    Map<String, Map<String, Object>> roles = (Map<String, Map<String, Object>>) jsonData.get("roles");
+    if (null == roles) {
+      log.warn("No roles found in roleAccess file");
+    }
+    else {
+      for (Map.Entry<String, Map<String, Object>> entry : roles.entrySet()) {
+        String role = entry.getKey();
+        Map<String, Object> values = entry.getValue();
+        setNotBlacklisted(values, role);
+        roleName2permissionString.put(StringUtils.lowerCase(role), jsonArray2ProjectPermissionStringSet(values.get("rules")));
+      }
+    }
+  }
+
+  private void setNotBlacklisted(Map<String, Object> values, String role){
+    if (values.containsKey("notBlacklisted")) {
+      Set<String> notBlacklisted = ((Collection<String>) values.get("notBlacklisted")).stream().map(blacklistProperties::get).flatMap(Collection::stream).collect(Collectors.toSet());
+      notBlacklistedForRole.put(role, notBlacklisted);
+    }
+    else {
+      notBlacklistedForRole.put(role, Collections.emptySet());
+    }
   }
 
   @SneakyThrows
@@ -96,6 +131,13 @@ public class PermissionService {
       }
     }
     return result;
+  }
+
+  private void setBlacklistProperties(Map<?, ?> blacklistPropertiesMap) {
+    if (null == blacklistPropertiesMap) return;
+    for (Map.Entry<?, ?> entry : blacklistPropertiesMap.entrySet()) {
+      blacklistProperties.put((String) entry.getKey(), new HashSet<>((Collection<String>) entry.getValue()));
+    }
   }
 
   private Set<String> jsonArray2ProjectPermissionStringSet(Object jsonArrayObject) {
