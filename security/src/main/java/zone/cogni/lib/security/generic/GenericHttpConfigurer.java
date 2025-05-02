@@ -13,11 +13,11 @@ import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,8 +34,9 @@ public class GenericHttpConfigurer extends SecurityHttpConfigurer<GenericHttpCon
   public void init(HttpSecurity http) {
     CompositeFilter compositeFilter = new CompositeFilter();
     compositeFilter.setFilters(List.of(this::initAuthentication, basicAuthHandler::handleFilter));
-    http.addFilterBefore(compositeFilter, LogoutFilter.class)
-        .apply(new LogoutConfigurer(globalProperties.getLogout()));
+    http.addFilterBefore(compositeFilter, LogoutFilter.class);
+    LogoutConfigurer logoutConfigurer = new LogoutConfigurer(globalProperties.getLogout());
+    logoutConfigurer.configure(http);
   }
 
   @Override

@@ -16,7 +16,7 @@ import zone.cogni.lib.security.generic.EnableSecurityGeneric;
 import zone.cogni.lib.security.off.EnableSecurityOff;
 import zone.cogni.lib.security.saml2.EnableSecuritySaml2;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 @Slf4j
