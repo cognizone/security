@@ -19,11 +19,11 @@ import zone.cogni.lib.security.common.BasicAuthUser;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Function;
@@ -40,11 +40,11 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private Map<String, DefaultUserDetails> userInfo;
 
-  @PostConstruct
   @SneakyThrows
-  private void init() {
-    log.info("Initializing basic-auth security");
-    InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer = authenticationManagerBuilder.inMemoryAuthentication();
+  private void configureInMemoryUsers(HttpSecurity http) {
+    log.info("Configuring in-memory basic-auth users");
+    AuthenticationManagerBuilder auth = http.getSharedObject(AuthenticationManagerBuilder.class);
+    InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer = auth.inMemoryAuthentication();
     userInfo = basicAuthProperties.getUsers()
                                   .entrySet()
                                   .stream()
@@ -71,11 +71,12 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
   @Override
   @SneakyThrows
   public void init(HttpSecurity http) {
-    http.httpBasic()
-        .realmName(StringUtils.defaultIfBlank(basicAuthProperties.getRealm(), defaultRealmName)).and()
-        .apply(new LogoutConfigurer(globalProperties.getLogout()))
-        .and()
+    configureInMemoryUsers(http); // Configure users here during init
+    http.httpBasic(httpBasic ->
+                           httpBasic.realmName(StringUtils.defaultIfBlank(basicAuthProperties.getRealm(), defaultRealmName)))
         .addFilterAfter(this::patchAuthenticationObjectFilter, BasicAuthenticationFilter.class);
+    LogoutConfigurer logoutConfigurer = new LogoutConfigurer(globalProperties.getLogout());
+    logoutConfigurer.configure(http);
   }
 
   @Override

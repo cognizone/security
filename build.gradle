@@ -1,6 +1,6 @@
 plugins {
   id 'pl.allegro.tech.build.axion-release' version '1.13.3'
-  id 'org.springframework.boot' version '2.6.14' apply false
+  id 'org.springframework.boot' version '3.3.6' apply false
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'idea'
   id 'java'
@@ -32,17 +32,17 @@ scmVersion {
 
 ext {
   assertJVersion = "3.24.2"
-  asquareVersion = "0.6.18"
+  asquareVersion = "0.7.0" //must replace with new version in the next commit
   commonsCollectionsVersion = "4.4"
   commonsLang3Version = "3.12.0"
   junitVersion = "5.9.2"
-  snakeyamlVersion = "1.33"
+  snakeyamlVersion = "2.4"
 }
 
 idea {
   project {
-    jdkName = "11"
-    languageLevel = "11"
+    jdkName = "17"
+    languageLevel = "17"
   }
 }
 
@@ -56,7 +56,7 @@ subprojects {
 
   group = 'zone.cogni.lib.security'
   version = scmVersion.version
-  sourceCompatibility = '11'
+  sourceCompatibility = '17'
 
   java {
     withJavadocJar()
@@ -78,11 +78,12 @@ subprojects {
     mavenCentral()
     maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://repo.spring.io/milestone" }
+    maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases/' }
   }
 
   dependencyManagement {
     imports {
-      mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+      mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.6")
     }
   }
 
