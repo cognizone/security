@@ -190,7 +190,7 @@ project("security") {
     }
   }
   signing {
-    if (project.hasProperty("publishToMavenCentral") || project.hasProperty("publishToCognizoneNexus")) {
+    if (project.hasProperty("signArtifacts")) {
       sign publishing.publications.mavenJava
     }
   }
