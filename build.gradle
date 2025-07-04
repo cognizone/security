@@ -190,9 +190,9 @@ project("security") {
     }
   }
   signing {
-    if (project.hasProperty("publishToMavenCentral")) {
+    //if (project.hasProperty("publishToMavenCentral")) {
       sign publishing.publications.mavenJava
-    }
+    //}
   }
 
   tasks.withType(Javadoc) {
