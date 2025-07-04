@@ -1,18 +1,18 @@
 plugins {
-  id 'pl.allegro.tech.build.axion-release' version '1.13.3'
-  id 'org.springframework.boot' version '2.6.14' apply false
-  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'pl.allegro.tech.build.axion-release' version '1.18.18'
+  id 'org.springframework.boot' version '3.5.3' apply false
+  id 'io.spring.dependency-management' version '1.1.7'
   id 'idea'
   id 'java'
   id 'java-library'
   id 'maven-publish'
-  id "io.freefair.lombok" version "6.5.1"
+  id "io.freefair.lombok" version "8.14"
 }
 
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url "https://repo.spring.io/milestone" }
+  maven { url = "https://repo.spring.io/milestone" }
 }
 
 scmVersion {
@@ -31,18 +31,16 @@ scmVersion {
 }
 
 ext {
-  assertJVersion = "3.24.2"
-  asquareVersion = "0.6.18"
-  commonsCollectionsVersion = "4.4"
-  commonsLang3Version = "3.12.0"
-  junitVersion = "5.9.2"
-  snakeyamlVersion = "1.33"
+  assertJVersion = "3.27.3"
+  commonsCollectionsVersion = "4.5.0"
+  commonsLang3Version = "3.17.0"
+  jakartaInjectVersion = "2.0.1"
 }
 
 idea {
   project {
-    jdkName = "11"
-    languageLevel = "11"
+    jdkName = "17"
+    languageLevel = "17"
   }
 }
 
@@ -56,9 +54,11 @@ subprojects {
 
   group = 'zone.cogni.lib.security'
   version = scmVersion.version
-  sourceCompatibility = '11'
 
   java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
     withJavadocJar()
     withSourcesJar()
   }
@@ -66,7 +66,7 @@ subprojects {
   repositories {
     if (project.hasProperty('jenkins-ci')) {
       maven {
-        url "${System.properties['nexus.url']}/repository/cognizone-group"
+        url = "${System.properties['nexus.url']}/repository/cognizone-group"
         credentials {
           username = System.properties['nexus.username']
           password = System.properties['nexus.password']
@@ -76,8 +76,9 @@ subprojects {
     }
     mavenLocal()
     mavenCentral()
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "https://repo.spring.io/milestone" }
+    maven { url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url = "https://repo.spring.io/milestone" }
+    maven { url = "https://build.shibboleth.net/maven/releases" }
   }
 
   dependencyManagement {
@@ -85,7 +86,6 @@ subprojects {
       mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
     }
   }
-
 
   tasks.named('test') {
     useJUnitPlatform()
@@ -100,16 +100,13 @@ project("security") {
 
   dependencies {
     compileOnly project(':security-empty-permission')
-    annotationProcessor 'org.projectlombok:lombok'
-    compileOnly 'org.projectlombok:lombok'
-
-    implementation("zone.cogni.asquare:cogni-core:${asquareVersion}")
-    implementation("org.yaml:snakeyaml:${snakeyamlVersion}") //because asquare says: Provides transitive vulnerable dependency org.yaml:snakeyaml:1.29
+    annotationProcessor("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok")
 
     // libs
     implementation("org.apache.commons:commons-collections4:${commonsCollectionsVersion}")
     implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
-    implementation("javax.inject:javax.inject:1")
+    implementation("jakarta.inject:jakarta.inject-api:${jakartaInjectVersion}")
 
     // spring
     implementation('org.springframework.boot:spring-boot-starter-web')
@@ -119,8 +116,8 @@ project("security") {
     //test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
     testImplementation("org.assertj:assertj-core:${assertJVersion}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   }
 
   publishing {
@@ -199,7 +196,7 @@ project("security") {
   }
 
   tasks.withType(Javadoc) {
-    failOnError false
+    failOnError = false
   }
 }
 

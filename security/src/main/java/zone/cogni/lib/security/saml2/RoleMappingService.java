@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import zone.cogni.core.spring.ResourceHelper;
+import zone.cogni.lib.security.common.ResourceHelper;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -23,7 +23,7 @@ public class RoleMappingService {
     if (null == roleMapping && StringUtils.isNotBlank(saml2Properties.getRoleMappingUrl())) {
       log.debug("Loading role map from : {}", saml2Properties.getRoleMappingUrl());
       Resource roleMappingResource = ResourceHelper.getResourceFromUrl(saml2Properties.getRoleMappingUrl());
-      try (InputStream is = ResourceHelper.getInputStream(roleMappingResource)) {
+      try (InputStream is = roleMappingResource.getInputStream()) {
         ObjectMapper mapper = new ObjectMapper();
         roleMapping = Collections.synchronizedMap((Map<String, String>) mapper.readValue(is, Map.class));
       }

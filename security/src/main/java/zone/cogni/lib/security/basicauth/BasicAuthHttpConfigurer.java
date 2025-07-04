@@ -5,9 +5,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -19,11 +21,11 @@ import zone.cogni.lib.security.common.BasicAuthUser;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Function;
@@ -71,11 +73,13 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
   @Override
   @SneakyThrows
   public void init(HttpSecurity http) {
-    http.httpBasic()
-        .realmName(StringUtils.defaultIfBlank(basicAuthProperties.getRealm(), defaultRealmName)).and()
-        .apply(new LogoutConfigurer(globalProperties.getLogout()))
-        .and()
+    http.httpBasic(this::httpBasicConfigurer)
+        .with(new LogoutConfigurer(globalProperties.getLogout()), Customizer.withDefaults())
         .addFilterAfter(this::patchAuthenticationObjectFilter, BasicAuthenticationFilter.class);
+  }
+
+  private void httpBasicConfigurer(HttpBasicConfigurer<HttpSecurity> configurer) {
+    configurer.realmName(StringUtils.defaultIfBlank(basicAuthProperties.getRealm(), defaultRealmName));
   }
 
   @Override

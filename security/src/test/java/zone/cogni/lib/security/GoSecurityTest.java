@@ -1,12 +1,12 @@
 package zone.cogni.lib.security;
 
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -13,11 +14,11 @@ import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class GenericHttpConfigurer extends SecurityHttpConfigurer<GenericHttpCon
     CompositeFilter compositeFilter = new CompositeFilter();
     compositeFilter.setFilters(List.of(this::initAuthentication, basicAuthHandler::handleFilter));
     http.addFilterBefore(compositeFilter, LogoutFilter.class)
-        .apply(new LogoutConfigurer(globalProperties.getLogout()));
+        .with(new LogoutConfigurer(globalProperties.getLogout()), Customizer.withDefaults());
   }
 
   @Override

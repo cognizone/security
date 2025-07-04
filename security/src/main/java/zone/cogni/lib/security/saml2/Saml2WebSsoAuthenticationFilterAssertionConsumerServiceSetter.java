@@ -3,8 +3,8 @@ package zone.cogni.lib.security.saml2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
-import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationFilter;
+import org.springframework.security.config.ObjectPostProcessor ;
+import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -12,9 +12,9 @@ import org.springframework.security.saml2.provider.service.registration.InMemory
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
-import zone.cogni.core.spring.ResourceHelper;
 import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.PermissionGlobalMethodSecurityConfiguration;
+import zone.cogni.lib.security.common.ResourceHelper;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -32,7 +32,7 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
 
   @Bean
   public Saml2HttpConfigurer saml2HttpConfigurer(@Value("${server.servlet.context-path:}") String contextPath) {
-    if(StringUtils.isBlank(contextPath)) {
+    if (StringUtils.isBlank(contextPath)) {
       contextPath = "/";
     }
     else {
@@ -92,7 +92,7 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
 
   private Saml2X509Credential loadJksSigningCertificate(Saml2Properties.SigningKeys signingKeyStore) {
     Resource storeResource = ResourceHelper.getResourceFromUrl(signingKeyStore.getStoreUrl());
-    try (InputStream storeInputStream = ResourceHelper.getInputStream(storeResource)) {
+    try (InputStream storeInputStream = storeResource.getInputStream()) {
       KeyStore keyStore = KeyStore.getInstance("JKS");
       keyStore.load(storeInputStream, signingKeyStore.getKeystorePassword().toCharArray());
 
@@ -104,6 +104,5 @@ public class Saml2Configuration extends PermissionGlobalMethodSecurityConfigurat
     catch (Exception e) {
       throw new RuntimeException("Failed to load certificate for signing", e);
     }
-
   }
 }

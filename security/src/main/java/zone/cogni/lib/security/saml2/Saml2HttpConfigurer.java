@@ -1,10 +1,15 @@
 package zone.cogni.lib.security.saml2;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.saml2.Saml2LoginConfigurer;
 import org.springframework.security.core.Authentication;
@@ -17,20 +22,16 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 import org.springframework.security.saml2.provider.service.metadata.OpenSamlMetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
+import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import zone.cogni.lib.security.DefaultUserDetails;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
 import zone.cogni.lib.security.common.BasicAuthHandler;
 import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -53,13 +54,11 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     RelyingPartyRegistrationResolver relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
     Saml2MetadataFilter metadataFilter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
 
-    Saml2LoginConfigurer<HttpSecurity> httpSecuritySaml2LoginConfigurer = http.saml2Login();
-    checkAssertionConsumerServiceUrl(httpSecuritySaml2LoginConfigurer);
-    http
-            .apply(new LogoutConfigurer(globalProperties.getLogout())).and()
-            .addFilterBefore(basicAuthHandler::handleFilter, Saml2WebSsoAuthenticationFilter.class)
-            .addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class)
-            .addFilterAfter(this::patchAuthenticationObjectFilter, Saml2WebSsoAuthenticationFilter.class);
+    http.saml2Login(this::checkAssertionConsumerServiceUrl)
+        .with(new LogoutConfigurer(globalProperties.getLogout()), Customizer.withDefaults())
+        .addFilterBefore(basicAuthHandler::handleFilter, Saml2WebSsoAuthenticationFilter.class)
+        .addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class)
+        .addFilterAfter(this::patchAuthenticationObjectFilter, Saml2WebSsoAuthenticationFilter.class);
   }
 
   private void checkAssertionConsumerServiceUrl(Saml2LoginConfigurer<HttpSecurity> httpSecuritySaml2LoginConfigurer) {

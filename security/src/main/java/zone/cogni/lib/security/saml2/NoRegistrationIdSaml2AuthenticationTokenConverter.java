@@ -17,7 +17,7 @@ import org.springframework.security.saml2.provider.service.web.Saml2Authenticati
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.Assert;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;

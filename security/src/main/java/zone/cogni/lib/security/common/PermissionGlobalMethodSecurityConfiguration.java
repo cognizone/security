@@ -13,7 +13,7 @@ import zone.cogni.lib.security.permission.PermissionServiceConfiguration;
 import zone.cogni.lib.security.permission.handler.PermissionAccessDecisionVoter;
 import zone.cogni.lib.security.permission.handler.PermissionMethodSecurityMetadataSource;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Optional;
 
 @Import(PermissionServiceConfiguration.class)
