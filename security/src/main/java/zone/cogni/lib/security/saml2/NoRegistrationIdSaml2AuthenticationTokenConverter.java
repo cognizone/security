@@ -2,7 +2,6 @@ package zone.cogni.lib.security.saml2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.CodecPolicy;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.saml2.core.Saml2Error;
@@ -34,7 +33,7 @@ import java.util.zip.InflaterOutputStream;
 @RequiredArgsConstructor
 public final class NoRegistrationIdSaml2AuthenticationTokenConverter implements AuthenticationConverter {
 
-  private static Base64 BASE64 = new Base64(0, new byte[] {'\n' }, false, CodecPolicy.STRICT);
+  private static Base64 BASE64 = new Base64(0, new byte[] {'\n' }, false);
 
   private Function<HttpServletRequest, AbstractSaml2AuthenticationRequest> loader = new HttpSessionSaml2AuthenticationRequestRepository()::loadAuthenticationRequest;;
 
