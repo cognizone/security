@@ -1,0 +1,26 @@
+mode: Mainline
+branches:
+  main:
+    regex: ^main$
+    is-mainline: true
+    tag: ''
+  release:
+    regex: ^release[/-]
+    is-release-branch: true
+    tag: rc
+  hotfix:
+    regex: ^hotfix[/-]
+    is-release-branch: true
+    tag: hotfix
+ignore:
+  sha: []
+tag-prefix: 'v'
+commit-message-incrementing: Enabled
+commit-message-strategies:
+  - ConventionalCommits
+  - MergeMessage
+  - EnabledByDefault
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
+update-build-number: true
+

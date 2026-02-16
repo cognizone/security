@@ -1,5 +1,4 @@
 plugins {
-  id 'pl.allegro.tech.build.axion-release' version '1.18.18'
   id 'org.springframework.boot' version '3.5.3' apply false
   id 'io.spring.dependency-management' version '1.1.7'
   id 'idea'
@@ -13,21 +12,6 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url = "https://repo.spring.io/milestone" }
-}
-
-scmVersion {
-  tag {
-    prefix = "v"
-    versionSeparator = ""
-    branchPrefix = [
-            'release/.*': 'release-v',
-            'hotfix/.*' : 'hotfix-v'
-    ]
-  }
-  nextVersion {
-    suffix = "SNAPSHOT"
-    separator = "-"
-  }
 }
 
 ext {
@@ -53,7 +37,7 @@ subprojects {
   apply plugin: 'signing'
 
   group = 'zone.cogni.lib.security'
-  version = scmVersion.version
+  version = project.hasProperty('version') ? project.property('version') : '0.0.1-SNAPSHOT'
 
   java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -125,7 +109,7 @@ project("security") {
       mavenJava(MavenPublication) {
         groupId = group
         artifactId = 'security'
-        version = scmVersion.version
+        version = project.version
         from components.java
 
         pom {

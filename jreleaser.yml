@@ -1,0 +1,35 @@
+project:
+  name: security
+  description: "Cognizone Security library"
+  links:
+    homepage: "https://github.com/cognizone/security"
+  authors:
+    - "Cognizone"
+  license: "Apache-2.0"
+
+release:
+  github:
+    enabled: true
+    owner: "cognizone"
+    name: "security"
+    tagName: "v{{projectVersion}}"
+    draft: false
+    prerelease: false
+
+signing:
+  active: ALWAYS
+  armored: true
+
+deploy:
+  maven:
+    mavenCentral:
+      active: ALWAYS
+      url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+      username: "{{env.JRELEASER_DEPLOY_MAVENCENTRAL_USERNAME}}"
+      password: "{{env.JRELEASER_DEPLOY_MAVENCENTRAL_PASSWORD}}"
+
+files:
+  artifacts:
+    - path: "security/build/libs/security-{{projectVersion}}.jar"
+      active: ALWAYS
+
