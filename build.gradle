@@ -34,7 +34,6 @@ subprojects {
   apply plugin: "io.freefair.lombok"
   apply plugin: 'io.spring.dependency-management'
   apply plugin: "maven-publish"
-  apply plugin: 'signing'
 
   group = 'zone.cogni.lib.security'
   version = project.hasProperty('version') ? project.property('version') : '0.0.1-SNAPSHOT'
@@ -144,8 +143,10 @@ project("security") {
     }
 
     repositories {
-      if (project.hasProperty("publishToCognizoneArchiva")) {
-        throw new GradleException("Publish to cognizone archiva is deprecated")
+      // Local staging directory for JReleaser to pick up and deploy to Maven Central
+      maven {
+        name = 'localStaging'
+        url = layout.buildDirectory.dir('staging-deploy')
       }
       if (project.hasProperty("publishToCognizoneNexus")) {
         maven {
@@ -159,23 +160,6 @@ project("security") {
           allowInsecureProtocol(true)
         }
       }
-      if (project.hasProperty("publishToMavenCentral")) {
-        maven {
-          credentials {
-            username = System.properties['ossrh.username']
-            password = System.properties['ossrh.password']
-          }
-          // Define repository URLs based on the version
-          def stagingRepoUrl = "${System.properties['ossrh.url']}/service/local/staging/deploy/maven2"
-          def snapshotsRepoUrl = "${System.properties['ossrh.url']}/content/repositories/snapshots"
-          url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : stagingRepoUrl
-        }
-      }
-    }
-  }
-  signing {
-    if (project.hasProperty("signArtifacts")) {
-      sign publishing.publications.mavenJava
     }
   }
 
