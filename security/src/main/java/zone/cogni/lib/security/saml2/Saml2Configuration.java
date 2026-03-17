@@ -13,7 +13,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import zone.cogni.lib.security.common.BasicAuthHandler;
-import zone.cogni.lib.security.common.PermissionGlobalMethodSecurityConfiguration;
+import zone.cogni.lib.security.common.PermissionMethodSecurityConfiguration;
 import zone.cogni.lib.security.common.ResourceHelper;
 
 import java.io.InputStream;
@@ -26,7 +26,7 @@ import static org.springframework.security.saml2.core.Saml2X509Credential.Saml2X
 
 @Configuration
 @Slf4j
-public class Saml2Configuration extends PermissionGlobalMethodSecurityConfiguration {
+public class Saml2Configuration extends PermissionMethodSecurityConfiguration {
   private static final String defaultEntityId = "{baseUrl}/saml2/service-provider-metadata/{registrationId}";
   private static final String defaultAssertionConsumerServiceLocation = "{baseUrl}/login/saml2/sso/{registrationId}";
 

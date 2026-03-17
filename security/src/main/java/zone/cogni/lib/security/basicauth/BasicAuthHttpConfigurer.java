@@ -6,14 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import zone.cogni.lib.security.DefaultUserDetails;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
@@ -39,26 +39,27 @@ public class BasicAuthHttpConfigurer extends SecurityHttpConfigurer<BasicAuthHtt
 
   private final GlobalProperties globalProperties;
   private final BasicAuthProperties basicAuthProperties;
-  private final AuthenticationManagerBuilder authenticationManagerBuilder;
+  private final InMemoryUserDetailsManager userDetailsManager;
   private Map<String, DefaultUserDetails> userInfo;
 
   @PostConstruct
-  @SneakyThrows
   private void init() {
     log.info("Initializing basic-auth security");
-    InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer = authenticationManagerBuilder.inMemoryAuthentication();
     userInfo = basicAuthProperties.getUsers()
                                   .entrySet()
                                   .stream()
-                                  .peek(entry -> addUser(configurer, entry.getKey(), entry.getValue()))
+                                  .peek(entry -> addUser(entry.getKey(), entry.getValue()))
                                   .map(entry -> convertToUserDetails(entry.getKey(), entry.getValue()))
                                   .collect(Collectors.toMap(DefaultUserDetails::getUsername, Function.identity()));
   }
 
-  private void addUser(InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> configurer, String userName, BasicAuthUser user) {
-    configurer.withUser(userName)
-              .password(user.getPassword())
-              .authorities(user.getRoles().toArray(emptyStringArray));
+  private void addUser(String userName, BasicAuthUser user) {
+    userDetailsManager.createUser(
+            User.withUsername(userName)
+                .password(user.getPassword())
+                .authorities(user.getRoles().toArray(emptyStringArray))
+                .build()
+    );
   }
 
   private DefaultUserDetails convertToUserDetails(String username, BasicAuthUser user) {

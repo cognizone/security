@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import zone.cogni.lib.security.common.BasicAuthHandler;
-import zone.cogni.lib.security.common.PermissionGlobalMethodSecurityConfiguration;
+import zone.cogni.lib.security.common.PermissionMethodSecurityConfiguration;
 
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
-public class GenericConfiguration extends PermissionGlobalMethodSecurityConfiguration {
+public class GenericConfiguration extends PermissionMethodSecurityConfiguration {
   private final GenericSecurity genericSecurity;
 
   @Bean

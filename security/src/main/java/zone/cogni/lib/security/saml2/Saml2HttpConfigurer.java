@@ -19,12 +19,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
-import org.springframework.security.saml2.provider.service.metadata.OpenSamlMetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
-import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
-import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import zone.cogni.lib.security.DefaultUserDetails;
 import zone.cogni.lib.security.SecurityHttpConfigurer;
@@ -33,6 +29,8 @@ import zone.cogni.lib.security.common.GlobalProperties;
 import zone.cogni.lib.security.common.LogoutConfigurer;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -49,15 +47,13 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
   private final String contextPath;
 
   @Override
-  public void init(HttpSecurity http) throws Exception {
+  public void init(HttpSecurity http) {
     log.info("Initializing saml2 security");
-    RelyingPartyRegistrationResolver relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
-    Saml2MetadataFilter metadataFilter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
 
     http.saml2Login(this::checkAssertionConsumerServiceUrl)
+        .saml2Metadata(Customizer.withDefaults())
         .with(new LogoutConfigurer(globalProperties.getLogout()), Customizer.withDefaults())
         .addFilterBefore(basicAuthHandler::handleFilter, Saml2WebSsoAuthenticationFilter.class)
-        .addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class)
         .addFilterAfter(this::patchAuthenticationObjectFilter, Saml2WebSsoAuthenticationFilter.class);
   }
 
@@ -66,8 +62,20 @@ public class Saml2HttpConfigurer extends SecurityHttpConfigurer<Saml2HttpConfigu
     if (StringUtils.isBlank(assertionConsumerServiceUrl) || assertionConsumerServiceUrl.endsWith("/{registrationId}")) return;
 
     RelyingPartyRegistration registrationId = relyingPartyRegistrationRepository.findByRegistrationId(saml2Properties.getRegistrationId());
+    String assertionConsumerServicePath = getAssertionConsumerServicePath(assertionConsumerServiceUrl);
     httpSecuritySaml2LoginConfigurer.authenticationConverter(new NoRegistrationIdSaml2AuthenticationTokenConverter(registrationId))
-                                    .addObjectPostProcessor(new Saml2WebSsoAuthenticationFilterAssertionConsumerServiceSetter(assertionConsumerServiceUrl, contextPath));
+                                    .loginProcessingUrl(assertionConsumerServicePath);
+  }
+
+  private String getAssertionConsumerServicePath(String assertionConsumerServiceUrl) {
+    try {
+      String path = new URL(assertionConsumerServiceUrl).getPath();
+      if (!path.startsWith(contextPath)) throw new RuntimeException("Path of AssertionConsumerServiceUrl does not start with " + contextPath);
+      return "/" + StringUtils.removeStart(path, contextPath);
+    }
+    catch (MalformedURLException e) {
+      throw new RuntimeException("Invalid assertionConsumerServiceUrl: [" + assertionConsumerServiceUrl + "]", e);
+    }
   }
 
   @Override
