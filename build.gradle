@@ -1,6 +1,6 @@
 plugins {
-  id 'pl.allegro.tech.build.axion-release' version '1.18.18'
-  id 'org.springframework.boot' version '3.5.3' apply false
+  id 'pl.allegro.tech.build.axion-release' version '1.21.1'
+  id 'org.springframework.boot' version '4.0.3' apply false
   id 'io.spring.dependency-management' version '1.1.7'
   id 'idea'
   id 'java'
@@ -31,16 +31,16 @@ scmVersion {
 }
 
 ext {
-  assertJVersion = "3.27.3"
+  assertJVersion = "3.27.7"
   commonsCollectionsVersion = "4.5.0"
-  commonsLang3Version = "3.17.0"
+  commonsLang3Version = "3.20.0"
   jakartaInjectVersion = "2.0.1"
 }
 
 idea {
   project {
-    jdkName = "17"
-    languageLevel = "17"
+    jdkName = "21"
+    languageLevel = "21"
   }
 }
 
@@ -56,8 +56,8 @@ subprojects {
   version = scmVersion.version
 
   java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 
     withJavadocJar()
     withSourcesJar()
@@ -115,6 +115,7 @@ project("security") {
 
     //test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.assertj:assertj-core:${assertJVersion}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

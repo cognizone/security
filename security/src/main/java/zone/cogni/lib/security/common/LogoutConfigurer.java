@@ -10,7 +10,7 @@ public class LogoutConfigurer extends AbstractHttpConfigurer<LogoutConfigurer, H
   private final GlobalProperties.Logout logout;
 
   @Override
-  public void init(HttpSecurity http) throws Exception {
+  public void init(HttpSecurity http) {
     if (StringUtils.isBlank(logout.getUrl())) return;
 
     http.logout(configurer -> {

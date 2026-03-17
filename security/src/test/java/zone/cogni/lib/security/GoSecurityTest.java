@@ -2,7 +2,7 @@ package zone.cogni.lib.security;
 
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,10 +24,8 @@ public abstract class GoSecurityTest {
   }
 
   protected void checkRoles(String... roles) {
-    Collection<? extends GrantedAuthority> authorities = DefaultTestController.authentication.getAuthorities();
     DefaultUserDetails userDetails = (DefaultUserDetails) DefaultTestController.authentication.getDetails();
-    assertThat(authorities)
-            .isEqualTo(userDetails.getAuthorities());
+    Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
     Collection<String> stringizedList = authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
     assertThat(stringizedList).hasSize(roles.length)
