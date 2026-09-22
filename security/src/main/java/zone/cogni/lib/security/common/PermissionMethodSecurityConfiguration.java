@@ -1,6 +1,5 @@
 package zone.cogni.lib.security.common;
 
-import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
